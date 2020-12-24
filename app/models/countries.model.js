@@ -1,16 +1,15 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize, Sequelize) => {
-    const roles = sequelize.define("roles", {
+    const countries = sequelize.define("countries", {
         name: {
-            type: DataTypes.STRING
+            type: DataTypes.STRING,
         },
         status: {
-            type: DataTypes.INTEGER 
-        }
+            type: DataTypes.INTEGER
+        },
     }, {
         timestamps: false,
     });
-    
-    return roles;
+    return countries;
 };

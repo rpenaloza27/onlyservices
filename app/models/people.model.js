@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 
-module.exports = (sequelize, Sequelize, document_type, users) => {
+module.exports = (sequelize, Sequelize, document_type, users, city) => {
     const people = sequelize.define("people", {
         address: {
             type: DataTypes.STRING
@@ -26,8 +26,23 @@ module.exports = (sequelize, Sequelize, document_type, users) => {
         user_id: {
             type: DataTypes.INTEGER 
         },
+        city_id: {
+            type: DataTypes.INTEGER 
+        },
+    }, {
+        timestamps: false,
     });
-    people.hasOne(document_type);
-    people.hasOne(users);
+    people.hasOne(document_type , {
+        foreignKey: 'id',
+        sourceKey: 'document_type',
+    });
+    people.hasOne(users, {
+        foreignKey: 'id',
+        sourceKey: 'user_id',
+    });
+    people.hasOne(city, {
+        foreignKey: 'id',
+        sourceKey: 'city_id',
+    });
     return people;
 };

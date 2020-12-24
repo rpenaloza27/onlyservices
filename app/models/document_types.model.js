@@ -8,6 +8,8 @@ module.exports = (sequelize, Sequelize) => {
         status: {
             type: DataTypes.INTEGER 
         }
+    }, {
+        timestamps: false,
     });
 
     return documents_types;

@@ -21,7 +21,16 @@ module.exports = (sequelize, Sequelize, roles) => {
         status: {
             type: DataTypes.INTEGER 
         },
+    },  {
+        timestamps: false,
     });
-    users.hasMany(roles);
+    users.hasOne(roles, {
+        foreignKey: 'id',
+        sourceKey: 'role_id',
+    });
+    // roles.hasMany(users, {
+    //     foreignKey: 'role_id',
+    //     sourceKey: 'id',
+    // })
     return users;
 };
