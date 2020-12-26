@@ -21,7 +21,7 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
         timestamps: false,
     });
     services.hasOne(users,  {
-        foreignKey: 'id',
+        foreignKey: 'firebase_id',
         sourceKey: 'user_id',
     });
     services.hasMany(details);
