@@ -20,7 +20,7 @@ exports.findServicesByCategories = (req, res) => {
             where: { category_id: req.params.category_id },
             include: {
                 model: services,
-                include: { model : user, include : people}
+                include: { model: user, include: people }
             }, attributes: ['category_id']
         })
             .then(data => {
