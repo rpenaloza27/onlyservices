@@ -30,4 +30,8 @@ app.listen(PORT, () => {
 });
 
 const db = require("./app/models");
-db.sequelize.sync();
+try{
+   db.sequelize.sync();
+}catch(e){
+  console.log("Err", e, "color: yellow")
+}

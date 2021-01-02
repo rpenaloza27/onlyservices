@@ -43,6 +43,26 @@ exports.create = (req, res) => {
         });
 };
 
+exports.findAll = (req, res ) => {
+    people.
+        findAll()
+        .then(data => {
+            if(data.length > 0){
+                res.send({
+                    success: true,
+                    data,
+                    message : "Usuario encontrado"
+                });
+            }else{
+                res.status(400).send({
+                    success: false,
+                    data,
+                    message : "Usuario  no encontrado"
+                });
+            }
+        });
+}
+
 // Find a single Tutorial with an id
 exports.findOne = (req, res) => {
     if(req.params.user_id){
@@ -59,7 +79,7 @@ exports.findOne = (req, res) => {
         res.staus(400).send({
             success: false,
             data : [],
-            message : "El id de usario es requerido"
+            message : "El id de usuario es requerido"
         });
     }
 };

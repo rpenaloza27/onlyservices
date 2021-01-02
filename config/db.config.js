@@ -1,8 +1,9 @@
 module.exports = {
-    HOST: "50.87.249.11",
-    USER: "funconte_xpress",
-    PASSWORD: "@Only5ervic3s2020",
-    DB: "funconte_onlyservices",
+    HOST: "db-mysql-nyc1-56592-do-user-8510195-0.b.db.ondigitalocean.com",
+    USER: "doadmin",
+    PASSWORD: "rdwjl11h0rl89p70",
+    DB: "onlyservices",
+    port : 25060,
     dialect: "mysql",
     pool: {
       max: 5,

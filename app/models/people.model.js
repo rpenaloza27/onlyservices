@@ -44,6 +44,10 @@ module.exports = (sequelize, Sequelize, document_type, users, city) => {
         foreignKey: 'user_id',
         sourceKey: 'id',
     });
+    people.associate = (models) => {
+        // associations can be defined here
+        people.belongsTo(users, { foreignKey: 'id'});
+    };
     people.hasOne(city, {
         foreignKey: 'id',
         sourceKey: 'city_id',

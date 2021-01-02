@@ -7,6 +7,7 @@ var router = require("express").Router();
 // Retrieve all Tutorials
 router.post("/", users.create);
 router.get("/:user_id", users.findOne);
+router.get("/", users.findAll);
 
 
 // Retrieve all published Tutorials
