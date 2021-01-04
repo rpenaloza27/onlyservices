@@ -18,7 +18,7 @@ exports.create = (req, res) => {
             const user = {
                 email: req.body.email,
                 password: req.body.password,
-                firebase_id: req.body.firebase_id,
+                firebase_id: req.body.firebase_id ? req.body.firebase_id :'',
                 role_id: req.body.role_id,
                 priority: 5
             };
@@ -237,6 +237,45 @@ exports.updateProfileImage = (req, res) => {
             }
         })
        
+        
+    }
+}
+
+exports.updateFirebaseIdByEmail = (req, res) => {
+    if(req.body.email && req.body.firebase_id){
+        users.update(
+            { firebase_id: req.body.firebase_id },
+            { where: { email : req.body.email } }
+        ).then(data => {
+            res.send({
+                success : true,
+                data,
+                message: "Id actualizado"
+            })
+        }).catch(e => {
+            res.status(400).send({
+                success : false,
+                data: [],
+                message: e
+            })
+        })
+    }else{
+        if(!req.body.email){
+            res.status(400).send({
+                success : false,
+                data: [],
+                message: "El email es requerido"
+            })
+            return;
+        }
+        if(!req.body.firebase_id){
+            res.status(400).send({
+                success : false,
+                data: [],
+                message: "El id es requerido"
+            })
+            return;
+        }
         
     }
 }

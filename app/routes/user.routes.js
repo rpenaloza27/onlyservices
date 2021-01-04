@@ -10,6 +10,7 @@ router.post("/", users.create);
 router.get("/:user_id", users.findOne);
 router.get("/firebase/:user_id", users.findOneByFirebaseId);
 router.put("/update_profile_image", image_service.saveImages("profile_photo", true), users.updateProfileImage);
+router.put("/update_firebase_id", users.updateFirebaseIdByEmail);
 router.get("/", users.findAll);
 
 
