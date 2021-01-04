@@ -6,6 +6,8 @@ const documents_types = db.documents_types;
 const cities = db.municipios;
 const departments = db.departments;
 const countries = db.countries
+const companies = db.companies;
+const { resolveUrl } = require("../services/image_url_resolver");
 
 
 
@@ -31,18 +33,45 @@ exports.create = (req, res) => {
                         user_id: data.id,
                         phone: req.body.phone ? req.body.phone : '',
                         dni: req.body.dni ? req.body.dni : '',
-                        profession : req.body.profession ? req.body.profession : ''
+                        profession: req.body.profession ? req.body.profession : ''
                     }
                     people.create(person)
                         .then(data2 => {
-                            res.send({
-                                success: true,
-                                data: [{
-                                    user: data,
-                                    person: data2
-                                }],
-                                message: "Usuario creado exitosamente"
-                            });
+                            if (req.body.role_id == 2) {
+                                const company = {
+                                    name: req.body.business_name,
+                                    nit: req.body.nit,
+                                    url: req.body.url ? req.body.url : '',
+                                    user_id: req.body.firebase_id
+                                }
+                                companies.create(company).then(co => {
+                                    res.send({
+                                        success: true,
+                                        data: [{
+                                            user: data,
+                                            person: data2,
+                                            company: co
+                                        }],
+                                        message: "Usuario creado exitosamente"
+                                    });
+                                }).catch(e => {
+                                    res.status(400).send({
+                                        success: false,
+                                        data: [],
+                                        message: "No se pudo crear la empresa"
+                                    });
+                                })
+                            } else {
+                                res.send({
+                                    success: true,
+                                    data: [{
+                                        user: data,
+                                        person: data2
+                                    }],
+                                    message: "Usuario creado exitosamente"
+                                });
+                            }
+
                         });
                 })
                 .catch(err => {
@@ -53,11 +82,11 @@ exports.create = (req, res) => {
                             err.message || "Some error occurred while creating the Tutorial."
                     });
                 });
-        }else{
+        } else {
             res.status(400).send({
                 success: false,
-                data:[],
-                message : "El email ya está registrado"
+                data: [],
+                message: "El email ya está registrado"
             })
         }
     }).catch(e => {
@@ -65,7 +94,7 @@ exports.create = (req, res) => {
             success: false,
             data: [],
             message:
-               e
+                e
         });
     })
 
@@ -97,7 +126,14 @@ exports.findOne = (req, res) => {
         //
         users.findOne({
             where: { id: req.params.user_id }, include:
-                [{ model: people, include: [{ model: documents_types }, { model: cities, include: [{ model: departments, include: countries }] }] }]
+                [{
+                    model: people, include:
+                        [{ model: documents_types },
+                        {
+                            model: cities,
+                            include: [{ model: departments, include: countries }]
+                        }]
+                }, { model: companies }]
         })
             .then(data => {
                 if (data != null) {
@@ -167,6 +203,43 @@ exports.findOneByFirebaseId = (req, res) => {
         });
     }
 };
+
+exports.updateProfileImage = (req, res) => {
+    if (req.file) {
+        users.findOne({where : {
+            firebase_id : req.body.user_id
+        }}).then(user => {
+            if(user != null){
+                people.update(
+                    { photo: resolveUrl(req.file.filename) },
+                    { where: { user_id : user.id } }
+                  )
+                    .then(result =>
+                        res.send({
+                            success: true,
+                            data: [],
+                            message: "Imagen de Perfil Actualizada"
+                        })
+                    )
+                    .catch(err =>
+                        res.status(400).send({
+                            success: false,
+                            data: [],
+                            message: err
+                        })
+                    )
+            }else{
+                res.status(400).send({
+                    success: false,
+                    data: [],
+                    message: "El usuario no existe"
+                })
+            }
+        })
+       
+        
+    }
+}
 
 // Update a Tutorial by the id in the request
 exports.update = (req, res) => {

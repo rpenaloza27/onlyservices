@@ -25,9 +25,9 @@ const fileImgaeFilter = (req, file, cb) => {
 }
 
 
-const saveImages = (imageParameter) => {
+const saveImages = (imageParameter, single=false) => {
     const upload = multer({storage: storage, fileFilter : fileImgaeFilter});
-    return upload.array(imageParameter);
+    return !single ? upload.array(imageParameter): upload.single(imageParameter);
 }
 
 

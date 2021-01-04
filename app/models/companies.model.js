@@ -8,6 +8,9 @@ module.exports = (sequelize, Sequelize, users) => {
         url: {
             type: DataTypes.STRING 
         },
+        nit: {
+            type: DataTypes.STRING 
+        },
         user_id: {
             type: DataTypes.STRING 
         },
@@ -17,9 +20,10 @@ module.exports = (sequelize, Sequelize, users) => {
     },  {
         timestamps: false,
     });
-    companies.hasOne(users,  {
-        foreignKey: 'firebase_id',
-        sourceKey: 'user_id',
-    });
+    companies.belongsTo(users,  {foreignKey: 'user_id', targetKey: 'firebase_id'});
+    users.hasOne(companies, {
+        foreignKey: 'user_id',
+        sourceKey: 'firebase_id'
+    })
     return companies;
 };

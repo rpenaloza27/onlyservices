@@ -101,6 +101,12 @@ exports.uploadImages = (req, res ,err) => {
       data: req.files,
       message: "Archivos subidos"
     })
+  }else{
+    res.status(400).send({
+      success: false,
+      data: [],
+      message: "Debe subir algún archivo"
+    })
   }
 }
 

@@ -28,6 +28,7 @@ module.exports = (sequelize, Sequelize, roles) => {
         foreignKey: 'id',
         sourceKey: 'role_id',
     });
+    
     // roles.hasMany(users, {
     //     foreignKey: 'role_id',
     //     sourceKey: 'id',
