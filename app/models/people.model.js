@@ -23,6 +23,9 @@ module.exports = (sequelize, Sequelize, document_type, users, city) => {
         last_name: {
             type: DataTypes.STRING 
         },
+        profession: {
+            type: DataTypes.STRING 
+        },
         user_id: {
             type: DataTypes.INTEGER 
         },

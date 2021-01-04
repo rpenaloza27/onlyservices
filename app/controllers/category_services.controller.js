@@ -4,6 +4,7 @@ const services = db.services;
 const user = db.users;
 const people = db.people;
 const Op = db.Sequelize.Op;
+const service_images = db.service_images;
 
 
 
@@ -16,14 +17,21 @@ exports.create = (req, res) => {
 exports.findServicesByCategories = (req, res) => {
 
     if (req.params.category_id) {
+        // ,
         categories_services.findAll({
-            where: { category_id: req.params.category_id },
+            where: { category_id: req.params.category_id, },
             include: {
                 model: services,
-                include: { model: user, include: people }
-            }, attributes: ['category_id']
+                include: [{ model: service_images,paranoid: false } ,{ model: user, include: people }],
+                order: [
+                    [{ model: user }, 'priority', 'asc']
+                ],
+                
+            }, attributes: ['category_id'],
+           
         })
             .then(data => {
+                console.log("Datos", data)
                 if (data.length > 0) {
                     res.send({
                         success: true,

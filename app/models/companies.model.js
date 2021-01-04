@@ -18,7 +18,7 @@ module.exports = (sequelize, Sequelize, users) => {
         timestamps: false,
     });
     companies.hasOne(users,  {
-        foreignKey: 'id',
+        foreignKey: 'firebase_id',
         sourceKey: 'user_id',
     });
     return companies;

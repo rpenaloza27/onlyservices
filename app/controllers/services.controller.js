@@ -76,16 +76,6 @@ exports.findAll = (req, res) => {
 exports.uploadImages = (req, res ,err) => {
   
   if (req.files) {
-    /**
-     *  "fieldname": "photos",
-            "originalname": "93601.jpg",
-            "encoding": "7bit",
-            "mimetype": "image/jpeg",
-            "destination": "public/imgs",
-            "filename": "photos1609774354654.jpg",
-            "path": "public\\imgs\\photos1609774354654.jpg",
-            "size": 153711
-     */
     for(let i = 0; i < req.files.length ; i++){
       const service_image = {
         url : resolveUrl(req.files[i].filename),

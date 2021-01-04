@@ -25,7 +25,14 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
         sourceKey: 'user_id',
     });
     services.hasMany(details);
-    services.hasMany(images);
+    services.hasMany(images,  {
+        foreignKey: 'service_id',
+        sourceKey: 'id',
+    });
+    images.belongsTo(services, {
+        foreignKey: 'service_id',
+        sourceKey: 'id',
+    });
     services.hasMany(comments);
     return services;
 };
