@@ -66,13 +66,27 @@ exports.findAll = (req, res ) => {
 // Find a single Tutorial with an id
 exports.findOne = (req, res) => {
     if(req.params.user_id){
-        people.
-        findOne({ where : { user_id : req.params.user_id}, include : users})
+        users.findOne({ where : { id : req.params.user_id}, include : people})
         .then(data => {
-            res.send({
-                success: true,
-                data,
-                message : "Usuario encontrado"
+            if(data != null){
+                res.send({
+                    success: true,
+                    data,
+                    message : "Usuario encontrado"
+                });
+            }else{
+                res.status(400).send({
+                    success: false,
+                    data : [],
+                    message : "Usuario no encontrado"
+                });
+            }
+        }).catch(e => {
+            console.log("Error", e)
+            res.status(400).send({
+                success: false,
+                data : [],
+                message : e
             });
         });
     }else{
