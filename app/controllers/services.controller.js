@@ -2,10 +2,12 @@ const db = require("../models");
 const services = db.services;
 const Op = db.Sequelize.Op;
 const categories_services = db.categories_services;
+const service_images = db.service_images;
+const { resolveUrl} = require("../services/image_url_resolver");
 
 
 
-// Create and Save a new Tutorial
+// Create and Save a new Services
 exports.create = (req, res) => {
   const service = {
     name: req.body.name,
@@ -71,37 +73,47 @@ exports.findAll = (req, res) => {
     });
 };
 
-//find Services by categories
-exports.findByCategory = (req, res) => {
-
-  services.findAll()
-    .then(data => {
-      if (data.length > 0) {
-        res.send({
-          success: true,
-          data,
-          message: "Lista de servivios "
-        });
-      } else {
-        res.status(400).send({
-          success: true,
-          data,
-          message: "No hay servicios "
-        });
+exports.uploadImages = (req, res ,err) => {
+  
+  if (req.files) {
+    /**
+     *  "fieldname": "photos",
+            "originalname": "93601.jpg",
+            "encoding": "7bit",
+            "mimetype": "image/jpeg",
+            "destination": "public/imgs",
+            "filename": "photos1609774354654.jpg",
+            "path": "public\\imgs\\photos1609774354654.jpg",
+            "size": 153711
+     */
+    for(let i = 0; i < req.files.length ; i++){
+      const service_image = {
+        url : resolveUrl(req.files[i].filename),
+        service_id : req.body.service_id
       }
+      service_images
+      .create(service_image)
+      .then(data => {
+
+      }).catch(e => {
+        if(i == (req.files.length-1)){
+          res.status(400).send({
+            success: false,
+            data: req.files,
+            message: e
+          })
+        }
+      })
+    }
+    
+    res.send({
+      success: true,
+      data: req.files,
+      message: "Archivos subidos"
     })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving tutorials."
-      });
-    });
+  }
 }
 
-// Find a single Tutorial with an id
-exports.findOne = (req, res) => {
-
-};
 
 // Update a Tutorial by the id in the request
 exports.update = (req, res) => {
