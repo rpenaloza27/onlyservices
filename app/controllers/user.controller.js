@@ -42,7 +42,7 @@ exports.create = (req, res) => {
                                     name: req.body.business_name,
                                     nit: req.body.nit,
                                     url: req.body.url ? req.body.url : '',
-                                    user_id: req.body.firebase_id
+                                    user_id: data.id
                                 }
                                 companies.create(company).then(co => {
                                     res.send({
