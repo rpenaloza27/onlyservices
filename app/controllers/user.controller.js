@@ -33,7 +33,8 @@ exports.create = (req, res) => {
                         user_id: data.id,
                         phone: req.body.phone ? req.body.phone : '',
                         dni: req.body.dni ? req.body.dni : '',
-                        profession: req.body.profession ? req.body.profession : ''
+                        profession: req.body.profession ? req.body.profession : '',
+                        genre : req.body.genre ? req.body.genre : '',
                     }
                     people.create(person)
                         .then(data2 => {
@@ -42,6 +43,7 @@ exports.create = (req, res) => {
                                     name: req.body.business_name,
                                     nit: req.body.nit,
                                     url: req.body.url ? req.body.url : '',
+                                    size: req.body.size ? req.body.size : '',
                                     user_id: data.id
                                 }
                                 companies.create(company).then(co => {

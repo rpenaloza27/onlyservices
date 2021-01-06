@@ -26,6 +26,9 @@ module.exports = (sequelize, Sequelize, document_type, users, city) => {
         profession: {
             type: DataTypes.STRING 
         },
+        genre: {
+            type: DataTypes.STRING,
+        },
         user_id: {
             type: DataTypes.INTEGER 
         },

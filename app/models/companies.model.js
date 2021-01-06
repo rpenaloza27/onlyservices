@@ -11,6 +11,9 @@ module.exports = (sequelize, Sequelize, users) => {
         nit: {
             type: DataTypes.STRING 
         },
+        size: {
+            type: DataTypes.STRING 
+        },
         user_id: {
             type: DataTypes.INTEGER 
         },
