@@ -17,6 +17,14 @@ module.exports = (sequelize, Sequelize) => {
     }, {
         timestamps: false,
     });
+
+    categories.hasMany(categories, {
+        as: 'subcategories',
+        foreignKey: 'parent_id',
+        sourceKey: 'id',
+        useJunctionTable: false
+    })
+    // categories.belongsTo(categories,  {foreignKey: 'parent_id', targetKey: 'id'});
     
     return categories;
 };
