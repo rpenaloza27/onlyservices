@@ -1,7 +1,7 @@
 const db = require("../models");
 const services = db.services;
 const user = db.users;
-const person = db.people;
+const people = db.people;
 const Op = db.Sequelize.Op;
 const categories_services = db.categories_services;
 const service_images = db.service_images;
@@ -114,7 +114,7 @@ exports.uploadImages = (req, res ,err) => {
 
 exports.findServicesByUser =(req, res) => {
   services
-  .findAll({where : {user_id: req.params.user_id}, include : {model: user, include: person}})
+  .findAll({where : {user_id: req.params.user_id}, include : [{ model: service_images,paranoid: false } ,{ model: user, include: people }]})
   .then(data => {
     if(data.length > 0){
       res.send({
