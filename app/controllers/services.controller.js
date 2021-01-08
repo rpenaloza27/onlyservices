@@ -1,5 +1,7 @@
 const db = require("../models");
 const services = db.services;
+const user = db.users;
+const person = db.people;
 const Op = db.Sequelize.Op;
 const categories_services = db.categories_services;
 const service_images = db.service_images;
@@ -108,6 +110,34 @@ exports.uploadImages = (req, res ,err) => {
       message: "Debe subir algún archivo"
     })
   }
+}
+
+exports.findServicesByUser =(req, res) => {
+  services
+  .findAll({where : {user_id: req.params.user_id}, include : {model: user, include: person}})
+  .then(data => {
+    if(data.length > 0){
+      res.send({
+        succes: true,
+        data,
+        message : "Lista de servicios del usuario"
+      })
+    }else{
+      res.status(400).send({
+        succes: false,
+        data : [],
+        message : "El usuario actualmente no tiene servicios"
+      })
+    }
+    
+
+  }).catch(e => {
+    res.status(400).send({
+      succes: false,
+      data: [e],
+      message : "Ocurrió un error al intentar buscar los servicios"
+    })
+  })
 }
 
 
