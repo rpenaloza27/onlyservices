@@ -23,7 +23,7 @@ module.exports = (sequelize, Sequelize, services, categories) => {
         sourceKey: 'role_id',
     }
      */
-    categories_services.hasOne(services,
+    categories_services.hasMany(services,
         {
             foreignKey: 'id',
             sourceKey: 'service_id',

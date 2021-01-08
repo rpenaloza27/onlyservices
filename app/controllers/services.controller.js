@@ -40,7 +40,7 @@ exports.create = (req, res) => {
   }).catch(err => {
     res.status(400).send({
       success: false,
-      data: [],
+      data: [{obj : req.body}],
       message:
         err.message || "Some error occurred while creating the Tutorial."
     });

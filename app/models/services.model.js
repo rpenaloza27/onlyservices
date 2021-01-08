@@ -12,7 +12,7 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
             type: DataTypes.STRING,
         },
         user_id: {
-            type: DataTypes.INTEGER 
+            type: DataTypes.STRING 
         },
         status: {
             type: DataTypes.INTEGER 
