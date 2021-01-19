@@ -103,6 +103,7 @@ exports.create = (req, res) => {
 };
 
 exports.findAll = (req, res) => {
+    
     people.
         findAll()
         .then(data => {
