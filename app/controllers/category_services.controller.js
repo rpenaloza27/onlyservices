@@ -26,6 +26,7 @@ exports.findServicesByCategories = (req, res) => {
                 order: [
                     [{ model: user }, 'priority', 'asc']
                 ],
+                where : { status : 1}
                 
             }, attributes: ['category_id'],
            

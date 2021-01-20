@@ -112,6 +112,35 @@ exports.uploadImages = (req, res ,err) => {
   }
 }
 
+exports.findOne = (req, res) => {
+  if(req.params.id){
+    services
+    .findOne({where : {id: req.params.id}, include : [{ model: service_images,paranoid: false } ,{ model: user, include: people }]})
+    .then(service => {
+      if(service != null){
+        res.send({
+          succes: false,
+          data : [service],
+          message : "Servicio encontrado"
+        })
+      }else{
+        res.send({
+          succes: false,
+          data : [],
+          message : "El servivio no existe"
+        })
+      }
+    });
+  }else{
+    res.send({
+      succes: false,
+      data : [],
+      message : "El id es requerido"
+    })
+  }
+  
+}
+
 exports.findServicesByUser =(req, res) => {
   services
   .findAll({where : {user_id: req.params.user_id}, include : [{ model: service_images,paranoid: false } ,{ model: user, include: people }]})
