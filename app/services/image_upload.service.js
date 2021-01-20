@@ -26,15 +26,7 @@ const fileImgaeFilter = (req, file, cb) => {
 
 
 const saveImages = (imageParameter, single = false) => {
-    var tinified = require("tinify");
-    tinified.key = "pfQkmgfd5MH1yQGJjYN1vdRCNsYpMnGM";
-    // Cloudinary Credentials, Its free
-    var cloudinary = require('cloudinary');
-    cloudinary.config({
-        cloud_name: 'onlyservices',
-        api_key: '889867664199168',
-        api_secret: 'jCmfIiAC6CyzCnp4qzXZXNb4jV0'
-    });
+    
     const upload = multer({ storage: storage, fileFilter: fileImgaeFilter });
     return !single ? upload.array(imageParameter) : upload.single(imageParameter);
 }
