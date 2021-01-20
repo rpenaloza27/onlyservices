@@ -14,6 +14,9 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
         user_id: {
             type: DataTypes.STRING 
         },
+        price: {
+            type: DataTypes.INTEGER 
+        },
         status: {
             type: DataTypes.INTEGER 
         },

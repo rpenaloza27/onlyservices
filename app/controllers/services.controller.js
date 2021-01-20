@@ -143,7 +143,62 @@ exports.findServicesByUser =(req, res) => {
 
 // Update a Tutorial by the id in the request
 exports.update = (req, res) => {
-
+  if(req.params.service_id){
+    services.findOne({
+      id:  req.params.service_id
+    }).then(service => {
+      if(service != null){
+        services.update({
+          name : req.body.name,
+          short_description : req.body.short_description,
+          long_description : req.body.long_description,
+          price : req.body.price
+        }, {where : {id : req.params.service_id }})
+        .then(data => {
+          res.send({
+            succes: true,
+            data :[
+              data
+            ],
+            message : "Servicio actualizado"
+          })
+        }).catch(e => {
+          res.send({
+            succes: false,
+            data :[
+              
+            ],
+            message : e
+          })
+        })
+      }else{
+        res.status(400).send({
+          succes: false,
+          data :[
+            
+          ],
+          message :"El servicio no se ha encontrado"
+        })
+      }
+    }).catch(e=> {
+      res.status(400).send({
+        succes: false,
+        data :[
+          
+        ],
+        message :e
+      })
+    })
+    
+  }else{
+    res.status(400).send({
+      succes: false,
+      data :[
+        
+      ],
+      message :"El id es requerido"
+    })
+  }
 };
 
 // Delete a Tutorial with the specified id in the request

@@ -8,6 +8,7 @@ const image_service = require("../services/image_upload.service");
 router.post("/create", services.create);
 router.post("/upload_images", image_service.saveImages('photos') ,services.uploadImages);
 router.get("/user_services/:user_id", services.findServicesByUser)
+router.put("/update/:service_id", services.update)
 
 
 // Retrieve all published Tutorials

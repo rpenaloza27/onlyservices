@@ -18,7 +18,7 @@ exports.create = (req, res) => {
             const user = {
                 email: req.body.email,
                 password: req.body.password,
-                firebase_id: req.body.firebase_id ? req.body.firebase_id :'',
+                firebase_id: req.body.firebase_id ? req.body.firebase_id : '',
                 role_id: req.body.role_id,
                 priority: 5
             };
@@ -34,7 +34,7 @@ exports.create = (req, res) => {
                         phone: req.body.phone ? req.body.phone : '',
                         dni: req.body.dni ? req.body.dni : '',
                         profession: req.body.profession ? req.body.profession : '',
-                        genre : req.body.genre ? req.body.genre : '',
+                        genre: req.body.genre ? req.body.genre : '',
                     }
                     people.create(person)
                         .then(data2 => {
@@ -102,8 +102,107 @@ exports.create = (req, res) => {
 
 };
 
+
+exports.update = (req, res) => {
+    if (req.params.user_id) {
+        users.findOne({ where: { firebase_id: req.params.user_id } }).then(data => {
+            if (data != null) {
+                users.update({
+                    email: req.body.email,
+                    password: req.body.password,
+                    role_id: req.body.role_id,
+                    priority: req.body.priority
+                },
+                    { where: { id: data.id } }
+                ).then(user => {
+                    people.update({
+                        first_name: req.body.first_name,
+                        last_name: req.body.last_name,
+                        city_id: req.body.city_id,
+                        document_type: req.body.document_type ? req.body.document_type : 1,
+                        phone: req.body.phone ? req.body.phone : '',
+                        dni: req.body.dni ? req.body.dni : '',
+                        profession: req.body.profession ? req.body.profession : '',
+                        genre: req.body.genre ? req.body.genre : '',
+                    }, { where: { user_id: data.id } })
+                        .then(person => {
+                            if (req.body.role_id == 2) {
+                                const company = {
+                                    name: req.body.business_name,
+                                    nit: req.body.nit,
+                                    url: req.body.url ? req.body.url : '',
+                                    size: req.body.size ? req.body.size : '',
+                                }
+                                companies.update(company, { where: { user_id: data.id } }).then(co => {
+                                    res.send({
+                                        success: true,
+                                        data: [{
+                                            user: data,
+                                            person: person,
+                                            company: co
+                                        }],
+                                        message: "Usuario actualizado exitosamente"
+                                    });
+                                }).catch(e => {
+                                    res.status(400).send({
+                                        success: false,
+                                        data: [{
+                                            user: data,
+                                            person: person,
+                                        }],
+                                        message: "Se actualizó el usuario, la persona pero no la empresa"
+                                    });
+                                })
+                            } else {
+                                res.send({
+                                    success: true,
+                                    data: [{
+                                        user: data,
+                                        person: person,
+                                    }],
+                                    message: "Usuario actualizado exitosamente"
+                                });
+                            }
+                        })
+                        .catch(e => {
+                            res.send({
+                                success: false,
+                                data: [{
+                                    user: data,
+                                }],
+                                message: "Se actualizó el usuario pero no la persona"
+                            });
+                        })
+                })
+                    .catch(e => {
+                        res.send({
+                            success: false,
+                            data: [{
+                                user: data,
+                            }],
+                            message: "No se pudo actulaizar el usuario"
+                        });
+                    })
+            } else {
+                res.status(400).send({
+                    success: false,
+                    data: [],
+                    message: "Usuario no encontrado"
+                })
+            }
+        })
+    } else {
+        res.status(400).send({
+            success: false,
+            data: [],
+            message: "El id es requerido"
+        })
+        return;
+    }
+};
+
 exports.findAll = (req, res) => {
-    
+
     people.
         findAll()
         .then(data => {
@@ -139,6 +238,7 @@ exports.findOne = (req, res) => {
                 }, { model: companies }]
         })
             .then(data => {
+                console.warn("Data", data)
                 if (data != null) {
                     res.send({
                         success: true,
@@ -174,7 +274,12 @@ exports.findOneByFirebaseId = (req, res) => {
         //
         users.findOne({
             where: { firebase_id: req.params.user_id }, include:
-                [{ model: people, include: [{ model: documents_types }, { model: cities, include: [{ model: departments, include: countries }] }] }]
+                [{
+                    model: people,
+                    include: [{ model: documents_types }, { model: cities, include: [{ model: departments, include: countries }] },]
+                },
+                { model: companies }
+                ]
         })
             .then(data => {
                 if (data != null) {
@@ -209,14 +314,16 @@ exports.findOneByFirebaseId = (req, res) => {
 
 exports.updateProfileImage = (req, res) => {
     if (req.file) {
-        users.findOne({where : {
-            firebase_id : req.body.user_id
-        }}).then(user => {
-            if(user != null){
+        users.findOne({
+            where: {
+                firebase_id: req.body.user_id
+            }
+        }).then(user => {
+            if (user != null) {
                 people.update(
                     { photo: resolveUrl(req.file.filename) },
-                    { where: { user_id : user.id } }
-                  )
+                    { where: { user_id: user.id } }
+                )
                     .then(result =>
                         res.send({
                             success: true,
@@ -231,7 +338,7 @@ exports.updateProfileImage = (req, res) => {
                             message: err
                         })
                     )
-            }else{
+            } else {
                 res.status(400).send({
                     success: false,
                     data: [],
@@ -239,54 +346,52 @@ exports.updateProfileImage = (req, res) => {
                 })
             }
         })
-       
-        
+
+
     }
 }
 
 exports.updateFirebaseIdByEmail = (req, res) => {
-    if(req.body.email && req.body.firebase_id){
+    if (req.body.email && req.body.firebase_id) {
         users.update(
             { firebase_id: req.body.firebase_id },
-            { where: { email : req.body.email } }
+            { where: { email: req.body.email } }
         ).then(data => {
             res.send({
-                success : true,
+                success: true,
                 data,
                 message: "Id actualizado"
             })
         }).catch(e => {
             res.status(400).send({
-                success : false,
+                success: false,
                 data: [],
                 message: e
             })
         })
-    }else{
-        if(!req.body.email){
+    } else {
+        if (!req.body.email) {
             res.status(400).send({
-                success : false,
+                success: false,
                 data: [],
                 message: "El email es requerido"
             })
             return;
         }
-        if(!req.body.firebase_id){
+        if (!req.body.firebase_id) {
             res.status(400).send({
-                success : false,
+                success: false,
                 data: [],
                 message: "El id es requerido"
             })
             return;
         }
-        
+
     }
 }
 
 // Update a Tutorial by the id in the request
-exports.update = (req, res) => {
 
-};
 
 // Delete a Tutorial with the specified id in the request
 exports.delete = (req, res) => {
