@@ -75,7 +75,7 @@ exports.findAll = (req, res) => {
     });
 };
 
-exports.uploadImages = (req, res ,err) => {
+exports.uploadImages = async (req, res ,err) => {
   
   if (req.files) {
     for(let i = 0; i < req.files.length ; i++){
@@ -83,19 +83,17 @@ exports.uploadImages = (req, res ,err) => {
         url : resolveUrl(req.files[i].filename),
         service_id : req.body.service_id
       }
-      service_images
-      .create(service_image)
-      .then(data => {
-
-      }).catch(e => {
-        if(i == (req.files.length-1)){
-          res.status(400).send({
-            success: false,
-            data: req.files,
-            message: e
-          })
-        }
-      })
+      try{
+        const response =await service_images
+        .create(service_image)
+      }catch(e){
+        res.status(400).send({
+          success: false,
+          data: req.files,
+          message: e
+        })
+        return;
+      }
     }
     
     res.send({

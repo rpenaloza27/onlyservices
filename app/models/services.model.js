@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize, Sequelize, users, details, images, comments) => {
-    const services = sequelize.define("services", {
+    const services = sequelize.define("serviceses", {
         name: {
             type: DataTypes.STRING,
         },
@@ -36,6 +36,9 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
         foreignKey: 'service_id',
         sourceKey: 'id',
     });
-    services.hasMany(comments);
+    services.hasMany(comments,  {
+        foreignKey: 'service_id',
+        sourceKey: 'id',
+    });
     return services;
 };
