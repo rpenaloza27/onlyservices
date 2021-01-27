@@ -28,7 +28,18 @@ module.exports = (sequelize, Sequelize, roles) => {
         foreignKey: 'id',
         sourceKey: 'role_id',
     });
-    
+    users.exists = async (firebase_id) => {
+        try{
+            const data = await users.findOne({
+                where : {
+                    firebase_id : firebase_id
+                }
+            });
+            return data != null;
+        }catch(e){
+            return false;
+        }
+    }
     // roles.hasMany(users, {
     //     foreignKey: 'role_id',
     //     sourceKey: 'id',

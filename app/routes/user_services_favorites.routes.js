@@ -1,4 +1,4 @@
-const users = require("../controllers/user.controller");
+const user_services_favorites = require("../controllers/user_services_favorites.controller");
 var router = require("express").Router();
 const image_service = require("../services/image_upload.service");
 
@@ -6,14 +6,10 @@ const image_service = require("../services/image_upload.service");
 // router.post("/", tutorials.create);
 
 // Retrieve all Tutorials
-router.post("/", users.create);
-router.get("/:user_id", users.findOne);
-router.get("/tests/:firebase_id", users.userExist);
-router.get("/firebase/:user_id", users.findOneByFirebaseId);
-router.put("/update_profile_image", image_service.saveImages("profile_photo", true), users.updateProfileImage);
-router.put("/update_firebase_id", users.updateFirebaseIdByEmail);
-router.put("/update/:user_id", users.update);
-router.get("/", users.findAll);
+router.post("/", user_services_favorites.create);
+// router.get("/user_favorites/:user_id", user_services_favorites.findBy);
+
+router.get("/user_favorites/:user_id", user_services_favorites.findByUser);
 
 
 // Retrieve all published Tutorials

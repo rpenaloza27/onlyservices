@@ -40,5 +40,17 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
         foreignKey: 'service_id',
         sourceKey: 'id',
     });
+    services.exists = async (id) => {
+        try{
+            const service_exist = await services.findOne({
+                where : {
+                    id : id
+                }
+            });
+            return service_exist != null;
+        }catch(e){
+            return false;
+        }
+    }
     return services;
 };

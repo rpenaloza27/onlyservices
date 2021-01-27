@@ -102,6 +102,15 @@ exports.create = (req, res) => {
 
 };
 
+exports.userExist = async (req, res ) => {
+    const user_exists = await users.exists(req.params.firebase_id);
+    res.send({
+        succes: true,
+        data : [user_exists],
+        message : "Prueba"
+    })
+}
+
 
 exports.update = (req, res) => {
     if (req.params.user_id) {

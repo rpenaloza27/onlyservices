@@ -2,9 +2,11 @@ const db = require("../models");
 const services = db.services;
 const user = db.users;
 const people = db.people;
+const service_comments = db.service_comments;
 const Op = db.Sequelize.Op;
 const categories_services = db.categories_services;
 const service_images = db.service_images;
+const service_details = db.service_details;
 const { resolveUrl} = require("../services/image_url_resolver");
 
 
@@ -15,6 +17,8 @@ exports.create = (req, res) => {
     name: req.body.name,
     short_description: req.body.short_description ? req.body.short_description : '',
     user_id: req.body.user_id,
+    long_description : req.body.long_description ? req.body.long_description : '',
+    price :req.body.price ? req.body.price : 0
   };
   services.create(service).then(async data => {
     for (let i = 0; i < req.body.categories.length; i++) {
@@ -37,7 +41,7 @@ exports.create = (req, res) => {
     }
     res.send({
       success: true,
-      data: [],
+      data: [service],
       message: "El servicio se ha creado con éxito"
     });
   }).catch(err => {
@@ -75,6 +79,91 @@ exports.findAll = (req, res) => {
       });
     });
 };
+
+exports.delete = async (req, res) => {
+  try{
+    const service_exists = await services.exists(req.params.service_id);
+    if(service_exists){
+      categories_services.destroy({
+        where : {
+          service_id: req.params.service_id
+        }
+      }).then(category_delete => {
+        service_images.destroy({
+          where : {
+            service_id: req.params.service_id
+          }
+        }).then(service_images_delete => {
+          service_details.destroy({
+            where : {
+              service_id: req.params.service_id
+            }
+          }).then(service_details_delete => {
+            services.destroy(
+              {
+                where: {
+                    id: req.params.service_id
+                }
+              }
+            ).then(service_delete => {
+              if(service_delete){
+                res.send({
+                  succes: true,
+                  data : [],
+                  message : "El servicio ha sido eliminado"
+                })
+              }else{
+                res.status(400).send({
+                  succes: false,
+                  data : [],
+                  message : "El servicio no se pudo eliminar"
+                })
+              }
+            }).catch(e =>{
+              res.status(400).send({
+                succes: false,
+                data : [],
+                message : e
+              })
+            })
+          }).catch(e=> {
+            res.status(400).send({
+              succes: false,
+              data : [],
+              message : e
+            })
+          })
+          
+        }).catch(e=> {
+          res.status(400).send({
+            succes: false,
+            data : [],
+            message : e
+          })
+        })
+        
+      }).catch(e => {
+        res.status(400).send({
+          succes: false,
+          data : [],
+          message : e
+        })
+      })
+    }else{
+      res.status(400).send({
+        succes: false,
+        data : [],
+        message : "El servicio no existe"
+      })
+    }
+  }catch(e){
+    res.status(400).send({
+      succes: false,
+      data : [],
+      message : e
+    })
+  }
+}
 
 exports.uploadImages = async (req, res ,err) => {
   
@@ -229,10 +318,7 @@ exports.update = (req, res) => {
   }
 };
 
-// Delete a Tutorial with the specified id in the request
-exports.delete = (req, res) => {
 
-};
 
 // Delete all Tutorials from the database.
 exports.deleteAll = (req, res) => {
