@@ -16,23 +16,24 @@ exports.create = (req, res) => {
     short_description: req.body.short_description ? req.body.short_description : '',
     user_id: req.body.user_id,
   };
-  services.create(service).then(data => {
+  services.create(service).then(async data => {
     for (let i = 0; i < req.body.categories.length; i++) {
       const category_service = {
         service_id: data.id,
         category_id: req.body.categories[i]
       };
-      categories_services
-        .create(category_service).then(data => {
-
-        }).catch(e => {
-          res.status(400).send({
-            success: false,
-            data: [],
-            message:
-              err.message || "Some error occurred while creating the Tutorial."
-          });
-        })
+      try {
+        const data_s = await categories_services
+        .create(category_service)
+      }catch(e){
+        res.status(400).send({
+          success: false,
+          data: [],
+          message:
+            e || "Some error occurred while creating the Tutorial."
+        });
+        return;
+      }
     }
     res.send({
       success: true,
