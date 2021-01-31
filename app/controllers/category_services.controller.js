@@ -3,8 +3,10 @@ const categories_services = db.categories_services;
 const services = db.services;
 const user = db.users;
 const people = db.people;
+const user_services_favorites = db.user_services_favorites;
 const Op = db.Sequelize.Op;
 const service_images = db.service_images;
+const { getPagination, getPagingData } = require("../services/pagination.service");
 
 
 
@@ -17,32 +19,36 @@ exports.create = (req, res) => {
 exports.findServicesByCategories = (req, res) => {
 
     if (req.params.category_id) {
-        // ,
-        categories_services.findAll({
+        const { page, size } = req.query;
+        const { limit, offset } = getPagination(page, size);
+        categories_services.findAndCountAll({
+            limit,
+            offset,
             where: { category_id: req.params.category_id, },
             include: {
                 model: services,
-                include: [{ model: service_images,paranoid: false } ,{ model: user, include: people }],
+                include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: user_services_favorites }],
                 order: [
                     [{ model: user }, 'priority', 'asc']
                 ],
-                where : { status : 1}
-                
+                where: { status: 1 }
+
             }, attributes: ['category_id'],
-           
+
         })
             .then(data => {
                 console.log("Datos", data)
-                if (data.length > 0) {
+                const response = getPagingData(data,page,limit, req);
+                if (data.rows.length > 0) {
                     res.send({
                         success: true,
-                        data,
+                        data: response,
                         message: "Lista de servivios "
                     });
                 } else {
                     res.status(400).send({
                         success: true,
-                        data,
+                        data: response,
                         message: "No hay servicios "
                     });
                 }

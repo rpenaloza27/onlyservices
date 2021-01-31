@@ -7,7 +7,9 @@ const Op = db.Sequelize.Op;
 const categories_services = db.categories_services;
 const service_images = db.service_images;
 const service_details = db.service_details;
-const { resolveUrl} = require("../services/image_url_resolver");
+const { resolveUrl } = require("../services/image_url_resolver");
+const {getPagination,getPagingData} = require("../services/pagination.service");
+
 
 
 
@@ -17,8 +19,8 @@ exports.create = (req, res) => {
     name: req.body.name,
     short_description: req.body.short_description ? req.body.short_description : '',
     user_id: req.body.user_id,
-    long_description : req.body.long_description ? req.body.long_description : '',
-    price :req.body.price ? req.body.price : 0
+    long_description: req.body.long_description ? req.body.long_description : '',
+    price: req.body.price ? req.body.price : 0
   };
   services.create(service).then(async data => {
     for (let i = 0; i < req.body.categories.length; i++) {
@@ -28,8 +30,8 @@ exports.create = (req, res) => {
       };
       try {
         const data_s = await categories_services
-        .create(category_service)
-      }catch(e){
+          .create(category_service)
+      } catch (e) {
         res.status(400).send({
           success: false,
           data: [],
@@ -47,7 +49,7 @@ exports.create = (req, res) => {
   }).catch(err => {
     res.status(400).send({
       success: false,
-      data: [{obj : req.body}],
+      data: [{ obj: req.body }],
       message:
         err.message || "Some error occurred while creating the Tutorial."
     });
@@ -81,102 +83,102 @@ exports.findAll = (req, res) => {
 };
 
 exports.delete = async (req, res) => {
-  try{
+  try {
     const service_exists = await services.exists(req.params.service_id);
-    if(service_exists){
+    if (service_exists) {
       categories_services.destroy({
-        where : {
+        where: {
           service_id: req.params.service_id
         }
       }).then(category_delete => {
         service_images.destroy({
-          where : {
+          where: {
             service_id: req.params.service_id
           }
         }).then(service_images_delete => {
           service_details.destroy({
-            where : {
+            where: {
               service_id: req.params.service_id
             }
           }).then(service_details_delete => {
             services.destroy(
               {
                 where: {
-                    id: req.params.service_id
+                  id: req.params.service_id
                 }
               }
             ).then(service_delete => {
-              if(service_delete){
+              if (service_delete) {
                 res.send({
                   succes: true,
-                  data : [],
-                  message : "El servicio ha sido eliminado"
+                  data: [],
+                  message: "El servicio ha sido eliminado"
                 })
-              }else{
+              } else {
                 res.status(400).send({
                   succes: false,
-                  data : [],
-                  message : "El servicio no se pudo eliminar"
+                  data: [],
+                  message: "El servicio no se pudo eliminar"
                 })
               }
-            }).catch(e =>{
+            }).catch(e => {
               res.status(400).send({
                 succes: false,
-                data : [],
-                message : e
+                data: [],
+                message: e
               })
             })
-          }).catch(e=> {
+          }).catch(e => {
             res.status(400).send({
               succes: false,
-              data : [],
-              message : e
+              data: [],
+              message: e
             })
           })
-          
-        }).catch(e=> {
+
+        }).catch(e => {
           res.status(400).send({
             succes: false,
-            data : [],
-            message : e
+            data: [],
+            message: e
           })
         })
-        
+
       }).catch(e => {
         res.status(400).send({
           succes: false,
-          data : [],
-          message : e
+          data: [],
+          message: e
         })
       })
-    }else{
+    } else {
       res.status(400).send({
         succes: false,
-        data : [],
-        message : "El servicio no existe"
+        data: [],
+        message: "El servicio no existe"
       })
     }
-  }catch(e){
+  } catch (e) {
     res.status(400).send({
       succes: false,
-      data : [],
-      message : e
+      data: [],
+      message: e
     })
   }
 }
 
-exports.uploadImages = async (req, res ,err) => {
-  
+exports.uploadImages = async (req, res, err) => {
+
   if (req.files) {
-    for(let i = 0; i < req.files.length ; i++){
+    for (let i = 0; i < req.files.length; i++) {
       const service_image = {
-        url : resolveUrl(req.files[i].filename),
-        service_id : req.body.service_id
+        url: resolveUrl(req.files[i].filename),
+        service_id: req.body.service_id
       }
-      try{
-        const response =await service_images
-        .create(service_image)
-      }catch(e){
+      try {
+        const response = await service_images
+          .create(service_image)
+      } catch (e) {
         res.status(400).send({
           success: false,
           data: req.files,
@@ -185,13 +187,13 @@ exports.uploadImages = async (req, res ,err) => {
         return;
       }
     }
-    
+
     res.send({
       success: true,
       data: req.files,
       message: "Archivos subidos"
     })
-  }else{
+  } else {
     res.status(400).send({
       success: false,
       data: [],
@@ -201,119 +203,153 @@ exports.uploadImages = async (req, res ,err) => {
 }
 
 exports.findOne = (req, res) => {
-  if(req.params.id){
+  if (req.params.id) {
     services
-    .findOne({where : {id: req.params.id}, include : [{ model: service_images,paranoid: false } ,{ model: user, include: people }]})
-    .then(service => {
-      if(service != null){
-        res.send({
-          succes: false,
-          data : [service],
-          message : "Servicio encontrado"
-        })
-      }else{
-        res.send({
-          succes: false,
-          data : [],
-          message : "El servivio no existe"
-        })
-      }
-    });
-  }else{
+      .findOne({ where: { id: req.params.id }, include: [{ model: service_images, paranoid: false }, { model: user, include: people }] })
+      .then(service => {
+        if (service != null) {
+          res.send({
+            succes: false,
+            data: [service],
+            message: "Servicio encontrado"
+          })
+        } else {
+          res.send({
+            succes: false,
+            data: [],
+            message: "El servivio no existe"
+          })
+        }
+      });
+  } else {
     res.send({
       succes: false,
-      data : [],
-      message : "El id es requerido"
+      data: [],
+      message: "El id es requerido"
     })
   }
-  
+
 }
 
-exports.findServicesByUser =(req, res) => {
-  services
-  .findAll({where : {user_id: req.params.user_id}, include : [{ model: service_images,paranoid: false } ,{ model: user, include: people }]})
-  .then(data => {
-    if(data.length > 0){
+exports.addVisit = async (req,res) => {
+  const service = await services.findOneCustom(req.params.service_id);
+  if(service != null){
+    service.number_of_visits++;
+    try{
+      await service.save()
       res.send({
         succes: true,
-        data,
-        message : "Lista de servicios del usuario"
+        data:[service],
+        message: "Número de visitas actualizada"
       })
-    }else{
+    }catch(e){
       res.status(400).send({
         succes: false,
-        data : [],
-        message : "El usuario actualmente no tiene servicios"
+        data:[],
+        message: "No se pudo actualizar el servicio"
       })
     }
-    
-
-  }).catch(e => {
+  }else{
     res.status(400).send({
       succes: false,
-      data: [e],
-      message : "Ocurrió un error al intentar buscar los servicios"
+      data:[],
+      message: "El servicio no existe"
+    })
+  }
+}
+
+exports.findServicesByUser = (req, res) => {
+  const { page, size }= req.query;
+  const {limit,offset} = getPagination(page,size);
+  services.findAndCountAll({
+    limit,
+    offset,
+    where: { user_id: req.params.user_id }, 
+    include: [{ model: service_images, paranoid: false }, { model: user, include: people }] 
+  }).then(data => {
+    const response = getPagingData(data,page,limit, req);
+    if(data.rows.length>0){
+      res
+      .send({
+        succes:true,
+        data: response,
+        message : "Lista de servicios"
+      })
+    }else{
+      res.status(400)
+      .send({
+        succes:false,
+        data: response,
+        message : "No hay datos con estos criterios"
+      })
+    }
+  }).catch(e =>{
+    res.status(400).send({
+      succes:false,
+      data:[],
+      message: "Ocurrión un error" +e
     })
   })
+  
 }
 
 
 // Update a Tutorial by the id in the request
 exports.update = (req, res) => {
-  if(req.params.service_id){
+  if (req.params.service_id) {
     services.findOne({
-      id:  req.params.service_id
+      id: req.params.service_id
     }).then(service => {
-      if(service != null){
+      if (service != null) {
         services.update({
-          name : req.body.name,
-          short_description : req.body.short_description,
-          long_description : req.body.long_description,
-          price : req.body.price
-        }, {where : {id : req.params.service_id }})
-        .then(data => {
-          res.send({
-            succes: true,
-            data :[
-              data
-            ],
-            message : "Servicio actualizado"
+          name: req.body.name,
+          short_description: req.body.short_description,
+          long_description: req.body.long_description,
+          price: req.body.price
+        }, { where: { id: req.params.service_id } })
+          .then(data => {
+            res.send({
+              succes: true,
+              data: [
+                data
+              ],
+              message: "Servicio actualizado"
+            })
+          }).catch(e => {
+            res.send({
+              succes: false,
+              data: [
+
+              ],
+              message: e
+            })
           })
-        }).catch(e => {
-          res.send({
-            succes: false,
-            data :[
-              
-            ],
-            message : e
-          })
-        })
-      }else{
+      } else {
         res.status(400).send({
           succes: false,
-          data :[
-            
+          data: [
+
           ],
-          message :"El servicio no se ha encontrado"
+          message: "El servicio no se ha encontrado"
         })
       }
-    }).catch(e=> {
+    }).catch(e => {
       res.status(400).send({
         succes: false,
-        data :[
-          
+        data: [
+
         ],
-        message :e
+        message: e
       })
     })
-    
-  }else{
+
+  } else {
     res.status(400).send({
       succes: false,
-      data :[
-        
+      data: [
+
       ],
-      message :"El id es requerido"
+      message: "El id es requerido"
     })
   }
 };

@@ -17,5 +17,10 @@ module.exports = (sequelize, Sequelize, services, person) => {
         foreignKey: 'id',
         sourceKey: 'service_id',
     });
+    services.hasMany(user_services_favorites, {
+        foreignKey: 'service_id',
+        sourceKey: 'id',
+    });
+    
     return user_services_favorites;
 };

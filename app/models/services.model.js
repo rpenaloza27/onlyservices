@@ -17,6 +17,9 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
         price: {
             type: DataTypes.INTEGER 
         },
+        number_of_visits : {
+            type: DataTypes.INTEGER
+        },
         status: {
             type: DataTypes.INTEGER 
         },
@@ -40,6 +43,7 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
         foreignKey: 'service_id',
         sourceKey: 'id',
     });
+    
     services.exists = async (id) => {
         try{
             const service_exist = await services.findOne({
@@ -50,6 +54,18 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
             return service_exist != null;
         }catch(e){
             return false;
+        }
+    }
+    services.findOneCustom = async (id) => {
+        try{
+            const service_exist = await services.findOne({
+                where : {
+                    id : id
+                }
+            });
+            return service_exist;
+        }catch(e){
+            return null;
         }
     }
     return services;

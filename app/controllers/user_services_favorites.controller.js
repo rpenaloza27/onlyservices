@@ -11,6 +11,8 @@ const services = db.services;
 
 const user_services_favorites = db.user_services_favorites;
 const { resolveUrl } = require("../services/image_url_resolver");
+const { getPagination, getPagingData } = require("../services/pagination.service");
+
 
 
 
@@ -26,7 +28,7 @@ exports.create = async (req, res) => {
                         user_id: req.body.user_id,
                         service_id: req.body.service_id
                     },
-                    attributes: ['user_id','service_id']
+                    attributes: ['user_id', 'service_id']
                 }).then(async data => {
                     if (data == null) {
                         const obj = {
@@ -57,19 +59,19 @@ exports.create = async (req, res) => {
                         }).then(favorite_delete => {
                             res.send({
                                 success: true,
-                                data : [favorite_delete],
-                                message : "Favorito eliminado exitosamente"
+                                data: [favorite_delete],
+                                message: "Favorito eliminado exitosamente"
                             })
                         }).catch(e => {
                             res.status(400).send({
                                 success: false,
-                                data : [],
-                                message : "No se pudo eliminar el favorito"
+                                data: [],
+                                message: "No se pudo eliminar el favorito"
                             })
                         });
                     }
                 })
-            }else{
+            } else {
                 res.status(400).send({
                     success: false,
                     data: [],
@@ -95,57 +97,66 @@ exports.create = async (req, res) => {
 };
 
 exports.findByUser = async (req, res) => {
-    try{
+    const { page, size } = req.query;
+    const { limit, offset } = getPagination(page, size);
+
+    try {
         const user_exists = await users.exists(req.params.user_id);
-        if(user_exists){
-            user_services_favorites.findAll({
-                where : {
-                    user_id : req.params.user_id
+        if (user_exists) {
+            user_services_favorites.findAndCountAll({
+                limit,
+                offset,
+                where: {
+                    user_id: req.params.user_id
                 },
-                include:{ model: services ,include : { model: users, include : [{
-                    model: people, include:
-                        [{ model: documents_types },
-                        {
-                            model: cities,
-                            include: [{ model: departments, include: countries }]
-                        }]
-                }, { model: companies }] } } 
-                
+                include: {
+                    model: services, include: {
+                        model: users, include: [{
+                            model: people, include:
+                                [{ model: documents_types },
+                                {
+                                    model: cities,
+                                    include: [{ model: departments, include: countries }]
+                                }]
+                        }, { model: companies }]
+                    }
+                }
             }).then(data => {
-                if(data.length > 0){
+                const response = getPagingData(data,page,limit, req);
+                if (data.rows.length > 0) {
                     res.send({
                         success: true,
-                        data,
-                        message : "Lista de favoritos"
+                        data :response,
+                        message: "Lista de favoritos"
                     })
-                }else{
+                } else {
                     res.status(400).send({
                         success: false,
-                        data : [],
-                        message : "No se encontró ningún favorito"
+                        data: [],
+                        message: "No se encontró ningún favorito"
                     })
                 }
             }).catch(e => {
                 res.status(400).send({
                     success: false,
-                    data : [],
-                    message : e
+                    data: [],
+                    message: e
                 })
             })
-        }else{
+        } else {
             res.status(400).send({
                 succes: false,
-                data : [],
-                message : e
+                data: [],
+                message: e
             })
         }
-    }catch(e){
+    } catch (e) {
         res.status(400).send({
             succes: false,
-            data : [],
-            message : e
+            data: [],
+            message: e
         })
-    } 
+    }
 }
 
 
