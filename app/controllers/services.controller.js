@@ -8,7 +8,7 @@ const categories_services = db.categories_services;
 const service_images = db.service_images;
 const service_details = db.service_details;
 const { resolveUrl } = require("../services/image_url_resolver");
-const {getPagination,getPagingData} = require("../services/pagination.service");
+const { getPagination, getPagingData } = require("../services/pagination.service");
 
 
 
@@ -41,9 +41,10 @@ exports.create = (req, res) => {
         return;
       }
     }
+    const service_u = await services.findOneCustom(data.id)
     res.send({
       success: true,
-      data: [service],
+      data: [service_u],
       message: "El servicio se ha creado con éxito"
     });
   }).catch(err => {
@@ -56,7 +57,7 @@ exports.create = (req, res) => {
   });
 };
 
-// Retrieve all Tutorials from the database.
+// Retrieve all Services from the database.
 exports.findAll = (req, res) => {
   services.findAll()
     .then(data => {
@@ -81,6 +82,97 @@ exports.findAll = (req, res) => {
       });
     });
 };
+
+exports.searchServices = (req, res) => {
+  const { page, size } = req.query;
+  const { limit, offset } = getPagination(page, size);
+  services.findAndCountAll(
+    {
+      limit,
+      offset,
+      where: {
+        [Op.or]: [
+          { name: { [Op.substring]: req.query.search } },
+          { long_description: { [Op.substring]: req.query.search } },
+          { short_description: { [Op.substring]: req.query.search } }
+        ],
+      },
+      include: [{ model: service_images, paranoid: false }, { model: user, include: people }]
+    }
+  ).then(data => {
+    const response = getPagingData(data, page, limit, req);
+    if (data.rows.length > 0) {
+      res
+        .send({
+          succes: true,
+          data: response,
+          message: "Lista de servicios"
+        })
+    } else {
+      res.status(400).send({
+        succes: false,
+        data: [],
+        message: "No hay servicios en esta categoría"
+      })
+    }
+  }).catch(e => {
+    res.status(400).send({
+      succes: false,
+      data: [],
+      message: e
+    })
+  })
+}
+
+exports.createCommentService = async (req, res) => {
+  service_comments.create({
+    comment: req.body.comment,
+    qualification: req.body.qualification ? req.body.qualification : 0,
+    user_id: req.body.user_id,
+    service_id: req.body.service_id
+  }).then(async service_comment => {
+    if (service_comment != null) {
+      const comments = await services.getComments(req.body.service_id);
+      let qualification = 0;
+      if (comments.length > 0) {
+        for (let index = 0; index < comments.length; index++) {
+          const element = comments[index];
+          qualification += element.qualification ? element.qualification : 0
+        }
+        qualification= qualification/comments.length;
+      }
+      const service_u = await services.findOneCustom(req.body.service_id);
+      try {
+        service_u.qualification = Number(qualification.toFixed(1));
+        await service_u.save()
+      } catch (e) {
+        res.send({
+          success: false,
+          data: [],
+          message: "Can't update the service" +e
+        })
+      }
+
+      res.send({
+        success: true,
+        data: [service_comment],
+        message: "Comentario guardado"
+      })
+    } else {
+      res.status(400).send({
+        succes: false,
+        data: [],
+        message: "No se pudo crear el comentario"
+      })
+    }
+  }).catch(e => {
+    res.status(400).send({
+      succes: false,
+      data: [],
+      message: e
+    })
+  })
+}
 
 exports.delete = async (req, res) => {
   try {
@@ -231,66 +323,99 @@ exports.findOne = (req, res) => {
 
 }
 
-exports.addVisit = async (req,res) => {
+exports.findServiceComments = (req, res) => {
+  const { page, size } = req.query;
+  const { limit, offset } = getPagination(page, size);
+  service_comments.findAndCountAll({
+    limit,
+    offset,
+    where: { service_id: req.params.service_id },
+  }).then(comments => {
+    const response = getPagingData(comments, page, limit, req);
+    if (comments.rows.length > 0) {
+      res.send({
+        success: true,
+        data: [response],
+        message: "Lista de comentarios"
+      })
+    } else {
+      res.status(400).send({
+        success: false,
+        data: [],
+        message: "No hay más comentarios"
+      })
+    }
+  })
+}
+
+exports.addVisit = async (req, res) => {
   const service = await services.findOneCustom(req.params.service_id);
-  if(service != null){
+  if (service != null) {
     service.number_of_visits++;
-    try{
+    try {
       await service.save()
       res.send({
         succes: true,
-        data:[service],
+        data: [service],
         message: "Número de visitas actualizada"
       })
-    }catch(e){
+    } catch (e) {
       res.status(400).send({
         succes: false,
-        data:[],
+        data: [],
         message: "No se pudo actualizar el servicio"
       })
     }
-  }else{
+  } else {
     res.status(400).send({
       succes: false,
-      data:[],
+      data: [],
       message: "El servicio no existe"
     })
   }
 }
 
 exports.findServicesByUser = (req, res) => {
-  const { page, size }= req.query;
-  const {limit,offset} = getPagination(page,size);
+  const { page, size } = req.query;
+  const { limit, offset } = getPagination(page, size);
   services.findAndCountAll({
     limit,
     offset,
-    where: { user_id: req.params.user_id }, 
-    include: [{ model: service_images, paranoid: false }, { model: user, include: people }] 
+    where: { user_id: req.params.user_id },
+    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments }]
   }).then(data => {
-    const response = getPagingData(data,page,limit, req);
-    if(data.rows.length>0){
-      res
-      .send({
-        succes:true,
-        data: response,
-        message : "Lista de servicios"
-      })
-    }else{
+    const response = getPagingData(data, page, limit, req);
+    if (data.rows.length > 0) {
+      for (let i = 0; i < response.rows.length; i++) {
+        response.rows[i].qualification = services.getQualification(response.rows[i].service_comments);
+        response.rows[i] = { ...response.rows[i] }
+        if (i == (response.rows.length - 1)) {
+          console.log("Response", response)
+          res
+            .send({
+              succes: true,
+              data: response,
+              message: "Lista de servicios"
+            })
+        }
+      }
+
+    } else {
       res.status(400)
-      .send({
-        succes:false,
-        data: response,
-        message : "No hay datos con estos criterios"
-      })
+        .send({
+          succes: false,
+          data: response,
+          message: "No hay datos con estos criterios"
+        })
     }
-  }).catch(e =>{
+  }).catch(e => {
     res.status(400).send({
-      succes:false,
-      data:[],
-      message: "Ocurrión un error" +e
+      succes: false,
+      data: [],
+      message: "Ocurrión un error" + e
     })
   })
-  
+
 }
 
 

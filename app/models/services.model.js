@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 
-module.exports = (sequelize, Sequelize, users, details, images, comments) => {
+module.exports = (sequelize, Sequelize, users, details, images, comments,people) => {
     const services = sequelize.define("serviceses", {
         name: {
             type: DataTypes.STRING,
@@ -18,6 +18,9 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
             type: DataTypes.INTEGER 
         },
         number_of_visits : {
+            type: DataTypes.INTEGER
+        },
+        qualification : {
             type: DataTypes.INTEGER
         },
         status: {
@@ -58,15 +61,41 @@ module.exports = (sequelize, Sequelize, users, details, images, comments) => {
     }
     services.findOneCustom = async (id) => {
         try{
+            
             const service_exist = await services.findOne({
                 where : {
                     id : id
-                }
+                },
+                include: [{ model: images, paranoid: false }, { model: users, include: people }]
             });
             return service_exist;
         }catch(e){
             return null;
         }
+    }
+
+    services.getQualification = (comments)=>{
+        if(comments){
+            let qualification=0;
+            if(comments.length>0){
+                comments.forEach(c=> {
+                    qualification+= c.qualification? c.qualification:0
+                })
+                let rate= qualification/comments.length;
+                return rate;
+            }
+            return qualification;
+        }
+        return 0;
+    }
+
+    services.getComments = async (service_id) =>{
+        const service_comments=await comments.findAll({
+            where:{
+                service_id
+            }
+        });
+        return service_comments;
     }
     return services;
 };
