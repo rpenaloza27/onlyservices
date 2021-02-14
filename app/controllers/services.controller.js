@@ -386,19 +386,11 @@ exports.findServicesByUser = (req, res) => {
   }).then(data => {
     const response = getPagingData(data, page, limit, req);
     if (data.rows.length > 0) {
-      for (let i = 0; i < response.rows.length; i++) {
-        response.rows[i].qualification = services.getQualification(response.rows[i].service_comments);
-        response.rows[i] = { ...response.rows[i] }
-        if (i == (response.rows.length - 1)) {
-          console.log("Response", response)
-          res
-            .send({
+      res.send({
               succes: true,
               data: response,
               message: "Lista de servicios"
             })
-        }
-      }
 
     } else {
       res.status(400)
