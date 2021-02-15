@@ -8,6 +8,7 @@ const departments = db.departments;
 const countries = db.countries
 const companies = db.companies;
 const services = db.services;
+const service_images=db.service_images;
 
 const user_services_favorites = db.user_services_favorites;
 const { resolveUrl } = require("../services/image_url_resolver");
@@ -110,7 +111,8 @@ exports.findByUser = async (req, res) => {
                     user_id: req.params.user_id
                 },
                 include: {
-                    model: services, include: {
+                    model: services, 
+                    include:[ {
                         model: users, include: [{
                             model: people, include:
                                 [{ model: documents_types },
@@ -119,7 +121,7 @@ exports.findByUser = async (req, res) => {
                                     include: [{ model: departments, include: countries }]
                                 }]
                         }, { model: companies }]
-                    }
+                    }, {model:service_images}]
                 }
             }).then(data => {
                 const response = getPagingData(data,page,limit, req);

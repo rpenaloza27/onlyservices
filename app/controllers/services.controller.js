@@ -59,7 +59,11 @@ exports.create = (req, res) => {
 
 // Retrieve all Services from the database.
 exports.findAll = (req, res) => {
-  services.findAll()
+  services.findAll({
+    limit,
+    offset,
+    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments }]
+  })
     .then(data => {
       if (data.length > 0) {
         res.send({

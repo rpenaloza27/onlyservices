@@ -2,9 +2,10 @@ const environment= require("../../environment/enviroment");
 
 const getPagination = (page,size) => {
     const limit = size ? +size:10;
+    console.log("Limit", limit);
     const offset = page? page*limit:0
     return {limit,offset};
-}
+} 
 
 const getPagingData =(data,page,limit, req)=>{
     const {count: total,rows} = data;
