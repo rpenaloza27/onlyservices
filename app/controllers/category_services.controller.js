@@ -4,9 +4,11 @@ const services = db.services;
 const user = db.users;
 const people = db.people;
 const user_services_favorites = db.user_services_favorites;
+const categories= db.categories;
 const Op = db.Sequelize.Op;
 const service_images = db.service_images;
 const { getPagination, getPagingData } = require("../services/pagination.service");
+const service_comments = db.service_comments;
 
 
 
@@ -27,13 +29,13 @@ exports.findServicesByCategories = (req, res) => {
             where: { category_id: req.params.category_id, },
             include: {
                 model: services,
-                include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: user_services_favorites }],
+                include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: user_services_favorites }, {model:service_comments, include:{model: user, include: people}} ],
                 order: [
                     [{ model: user }, 'priority', 'asc']
                 ],
                 where: { status: 1 }
 
-            }, attributes: ['category_id'],
+            }, attributes: {exclude: ['createdAt']},
 
         })
             .then(data => {

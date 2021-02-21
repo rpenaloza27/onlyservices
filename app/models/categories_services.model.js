@@ -33,6 +33,7 @@ module.exports = (sequelize, Sequelize, services, categories) => {
         foreignKey: 'id',
         sourceKey: 'category_id',
     });
+
     // services.belongsToMany(categories, { through: categories_services });
     // categories.belongsToMany(services, { through: categories_services, });
     return categories_services;

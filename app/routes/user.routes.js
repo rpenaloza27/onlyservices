@@ -14,6 +14,7 @@ router.put("/update_profile_image", image_service.saveImages("profile_photo", tr
 router.put("/update_firebase_id", users.updateFirebaseIdByEmail);
 router.put("/update/:user_id", users.update);
 router.get("/", users.findAll);
+router.get("/companies/featured", users.findAllBusiness);
 
 
 // Retrieve all published Tutorials

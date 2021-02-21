@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 
-module.exports = (sequelize, Sequelize, users, details, images, comments,people) => {
+
+module.exports = (sequelize, Sequelize, users, details, images, comments, people, categories, categories_services) => {
     const services = sequelize.define("serviceses", {
         name: {
             type: DataTypes.STRING,
@@ -12,29 +13,29 @@ module.exports = (sequelize, Sequelize, users, details, images, comments,people)
             type: DataTypes.STRING,
         },
         user_id: {
-            type: DataTypes.STRING 
+            type: DataTypes.STRING
         },
         price: {
-            type: DataTypes.INTEGER 
-        },
-        number_of_visits : {
             type: DataTypes.INTEGER
         },
-        qualification : {
+        number_of_visits: {
+            type: DataTypes.INTEGER
+        },
+        qualification: {
             type: DataTypes.INTEGER
         },
         status: {
-            type: DataTypes.INTEGER 
+            type: DataTypes.INTEGER
         },
     }, {
         timestamps: false,
     });
-    services.hasOne(users,  {
+    services.hasOne(users, {
         foreignKey: 'firebase_id',
         sourceKey: 'user_id',
     });
     services.hasMany(details);
-    services.hasMany(images,  {
+    services.hasMany(images, {
         foreignKey: 'service_id',
         sourceKey: 'id',
     });
@@ -42,46 +43,47 @@ module.exports = (sequelize, Sequelize, users, details, images, comments,people)
         foreignKey: 'service_id',
         sourceKey: 'id',
     });
-    services.hasMany(comments,  {
+    services.hasMany(comments, {
         foreignKey: 'service_id',
         sourceKey: 'id',
     });
     
+
     services.exists = async (id) => {
-        try{
+        try {
             const service_exist = await services.findOne({
-                where : {
-                    id : id
+                where: {
+                    id: id
                 }
             });
             return service_exist != null;
-        }catch(e){
+        } catch (e) {
             return false;
         }
     }
     services.findOneCustom = async (id) => {
-        try{
-            
+        try {
+
             const service_exist = await services.findOne({
-                where : {
-                    id : id
+                where: {
+                    id: id
                 },
                 include: [{ model: images, paranoid: false }, { model: users, include: people }]
             });
             return service_exist;
-        }catch(e){
+        } catch (e) {
             return null;
         }
     }
 
-    services.getQualification = (comments)=>{
-        if(comments){
-            let qualification=0;
-            if(comments.length>0){
-                comments.forEach(c=> {
-                    qualification+= c.qualification? c.qualification:0
+    services.getQualification = (comments) => {
+        if (comments) {
+            let qualification = 0;
+            if (comments.length > 0) {
+                comments.forEach(c => {
+                    qualification += c.qualification ? c.qualification : 0
                 })
-                let rate= qualification/comments.length;
+                let rate = qualification / comments.length;
                 return rate;
             }
             return qualification;
@@ -89,9 +91,9 @@ module.exports = (sequelize, Sequelize, users, details, images, comments,people)
         return 0;
     }
 
-    services.getComments = async (service_id) =>{
-        const service_comments=await comments.findAll({
-            where:{
+    services.getComments = async (service_id) => {
+        const service_comments = await comments.findAll({
+            where: {
                 service_id
             }
         });

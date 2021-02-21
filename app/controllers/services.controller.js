@@ -7,8 +7,11 @@ const Op = db.Sequelize.Op;
 const categories_services = db.categories_services;
 const service_images = db.service_images;
 const service_details = db.service_details;
+const categories = db.categories;
 const { resolveUrl } = require("../services/image_url_resolver");
 const { getPagination, getPagingData } = require("../services/pagination.service");
+const fs = require("fs");
+const enviroment = require("../../environment/enviroment");
 
 
 
@@ -62,7 +65,7 @@ exports.findAll = (req, res) => {
   services.findAll({
     limit,
     offset,
-    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments }]
+    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments, include:{model: user, include: people} }]
   })
     .then(data => {
       if (data.length > 0) {
@@ -101,7 +104,7 @@ exports.searchServices = (req, res) => {
           { short_description: { [Op.substring]: req.query.search } }
         ],
       },
-      include: [{ model: service_images, paranoid: false }, { model: user, include: people }]
+      include: [{ model: service_images, paranoid: false }, { model: user, include: people },{ model: service_comments, include:{model: user, include: people} }]
     }
   ).then(data => {
     const response = getPagingData(data, page, limit, req);
@@ -128,6 +131,35 @@ exports.searchServices = (req, res) => {
   })
 }
 
+exports.findCategoriesServices = (req, res) => {
+  categories_services.findAll({
+    where: {
+      service_id: req.params.service_id
+    },
+    include: { model: categories }
+  }).then(data => {
+    if (data.length > 0) {
+      res.send({
+        success: true,
+        data,
+        message: "Lista de categorías"
+      })
+    } else {
+      res.status(400).send({
+        success: false,
+        data: [],
+        message: "No tiene categorías"
+      })
+    }
+  }).catch(e => {
+    res.status(400).send({
+      success: false,
+      data: [],
+      message: e
+    })
+  })
+}
+
 exports.createCommentService = async (req, res) => {
   service_comments.create({
     comment: req.body.comment,
@@ -143,7 +175,7 @@ exports.createCommentService = async (req, res) => {
           const element = comments[index];
           qualification += element.qualification ? element.qualification : 0
         }
-        qualification= qualification/comments.length;
+        qualification = qualification / comments.length;
       }
       const service_u = await services.findOneCustom(req.body.service_id);
       try {
@@ -153,7 +185,7 @@ exports.createCommentService = async (req, res) => {
         res.send({
           success: false,
           data: [],
-          message: "Can't update the service" +e
+          message: "Can't update the service" + e
         })
       }
 
@@ -301,7 +333,10 @@ exports.uploadImages = async (req, res, err) => {
 exports.findOne = (req, res) => {
   if (req.params.id) {
     services
-      .findOne({ where: { id: req.params.id }, include: [{ model: service_images, paranoid: false }, { model: user, include: people }] })
+      .findOne({
+        where: { id: req.params.id },
+        include: [{ model: service_images, paranoid: false }, { model: user, include: people },{ model: service_comments, include:{model: user, include: people} }]
+      })
       .then(service => {
         if (service != null) {
           res.send({
@@ -334,6 +369,7 @@ exports.findServiceComments = (req, res) => {
     limit,
     offset,
     where: { service_id: req.params.service_id },
+    include: {model: user, include: people}
   }).then(comments => {
     const response = getPagingData(comments, page, limit, req);
     if (comments.rows.length > 0) {
@@ -350,6 +386,55 @@ exports.findServiceComments = (req, res) => {
       })
     }
   })
+}
+
+exports.deleteImage = async (req, res) => {
+  const image = await service_images.findOne({
+    where:{
+      id: req.params.id
+    }
+  })
+  if (image != null) {
+    const env_path= enviroment.production ? 'http://157.245.112.96': enviroment.URL_LOCAL;
+    const url = `public/${image.url.replace(env_path, "")}`;
+    fs.unlink(url, function (err) {
+      if (err) {
+        res.status(400).send({
+          success:false,
+          data:[{url, image_url: image.url}],
+          message: "No se encontró la ruta del archivo " + err
+        })
+        return console.log(err);
+      }
+      service_images.destroy({
+        where:{
+          id: req.params.id
+        }
+      }).then(data_deleted=>{
+        res.send({
+          success: true,
+          data:[data_deleted],
+          message:"Imagen Eliminada"
+        })
+      }).catch(e=>{
+        res.status(400).send({
+          success: true,
+          data:[],
+          message:"No se pudo eliminar la imagen"
+        })
+      })
+      
+      console.log('file deleted successfully');
+    });
+    
+  } else {
+    res.status(400)
+    .send({
+      success:true,
+      data:[],
+      message:"No se encontró la imagen"
+    })
+  }
 }
 
 exports.addVisit = async (req, res) => {
@@ -386,15 +471,15 @@ exports.findServicesByUser = (req, res) => {
     limit,
     offset,
     where: { user_id: req.params.user_id },
-    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments }]
+    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments, include: {model: user, include: people} }]
   }).then(data => {
     const response = getPagingData(data, page, limit, req);
     if (data.rows.length > 0) {
       res.send({
-              succes: true,
-              data: response,
-              message: "Lista de servicios"
-            })
+        succes: true,
+        data: response,
+        message: "Lista de servicios"
+      })
 
     } else {
       res.status(400)

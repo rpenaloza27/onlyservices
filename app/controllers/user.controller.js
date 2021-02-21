@@ -8,6 +8,7 @@ const departments = db.departments;
 const countries = db.countries
 const companies = db.companies;
 const { resolveUrl } = require("../services/image_url_resolver");
+const { response } = require("../services/response.service");
 
 
 
@@ -102,12 +103,12 @@ exports.create = (req, res) => {
 
 };
 
-exports.userExist = async (req, res ) => {
+exports.userExist = async (req, res) => {
     const user_exists = await users.exists(req.params.firebase_id);
     res.send({
         succes: true,
-        data : [user_exists],
-        message : "Prueba"
+        data: [user_exists],
+        message: "Prueba"
     })
 }
 
@@ -231,6 +232,42 @@ exports.findAll = (req, res) => {
         });
 }
 
+exports.findAllBusiness = (req, res) => {
+    users.findAll({
+        where: {
+            role_id: 2,
+            priority: { [Op.in]: [1, 2, 3] }
+        },
+        order: [
+            // will return `name`
+            ['priority', 'ASC'],
+        ],
+        include:
+            [{
+                model: people, include:
+                    [{ model: documents_types },
+                    {
+                        model: cities,
+                        include: [{ model: departments, include: countries }]
+                    }]
+            }, { model: companies }]
+    }).then(data => {
+        let options = {}
+        if (data.length > 0) {
+            options = {
+                data,
+
+            }
+        } else {
+            options = {
+                error: true
+            }
+        }
+        options.message = options.error ? "No hay empresas destacadas" : "Lista de empresas destacadas"
+        response(res, options)
+    })
+}
+
 // Find a single Tutorial with an id
 exports.findOne = (req, res) => {
     if (req.params.user_id) {
@@ -327,8 +364,69 @@ exports.updateProfileImage = (req, res) => {
             where: {
                 firebase_id: req.body.user_id
             }
-        }).then(user => {
+        }).then(async user => {
             if (user != null) {
+                const person = people.findOne(
+                    { where: { user_id: user.id } }
+                );
+                if (person) {
+                    try {
+                        if (person.photo) {
+                            const env_path = enviroment.production ? 'http://157.245.112.96' : enviroment.URL_LOCAL;
+                            const url = `public/${person.photo.replace(env_path, "")}`;
+                            fs.unlink(url, async function (err) {
+                                if (err) {
+                                    res.status(400).send({
+                                        success: false,
+                                        data: [{ url, image_url: person.photo }],
+                                        message: "No se encontró la ruta del archivo " + err
+                                    })
+                                    return console.log(err);
+                                }
+                                try {
+                                    person.photo = resolveUrl(req.file.filename)
+                                    await person.save();
+                                    res.send({
+                                        success: true,
+                                        data: [],
+                                        message: "Imagen Eliminada"
+                                    })
+                                } catch (e) {
+                                    res.status(400).send({
+                                        success: false,
+                                        data: [],
+                                        message: "No se pudo actualizar"
+                                    })
+                                }
+
+                                console.log('file deleted successfully');
+                            });
+                        } else {
+                            try {
+                                person.photo = resolveUrl(req.file.filename)
+                                await person.save();
+                                res.send({
+                                    success: true,
+                                    data: [],
+                                    message: "Imagen de Perfil Actualizada"
+                                })
+                            } catch (e) {
+                                res.status(400).send({
+                                    success: false,
+                                    data: [],
+                                    message: "No se pudo actualizar la imagen de perfil"
+                                })
+                            }
+                        }
+                    } catch (e) {
+                        res.status(400).send({
+                            success: false,
+                            data: [],
+                            message: "Imagen de Perfil Actualizada"
+                        })
+                    }
+
+                }
                 people.update(
                     { photo: resolveUrl(req.file.filename) },
                     { where: { user_id: user.id } }
