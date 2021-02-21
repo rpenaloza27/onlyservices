@@ -9,6 +9,8 @@ const countries = db.countries
 const companies = db.companies;
 const { resolveUrl } = require("../services/image_url_resolver");
 const { response } = require("../services/response.service");
+const enviroment = require("../../environment/enviroment");
+const fs = require("fs");
 
 
 
@@ -134,6 +136,7 @@ exports.update = (req, res) => {
                         dni: req.body.dni ? req.body.dni : '',
                         profession: req.body.profession ? req.body.profession : '',
                         genre: req.body.genre ? req.body.genre : '',
+                        address: req.body.address ? req.body.address : '',
                     }, { where: { user_id: data.id } })
                         .then(person => {
                             if (req.body.role_id == 2) {
@@ -366,7 +369,7 @@ exports.updateProfileImage = (req, res) => {
             }
         }).then(async user => {
             if (user != null) {
-                const person = people.findOne(
+                const person = await people.findOne(
                     { where: { user_id: user.id } }
                 );
                 if (person) {
@@ -414,7 +417,7 @@ exports.updateProfileImage = (req, res) => {
                                 res.status(400).send({
                                     success: false,
                                     data: [],
-                                    message: "No se pudo actualizar la imagen de perfil"
+                                    message: "No se pudo actualizar la imagen de perfil" +e 
                                 })
                             }
                         }
@@ -422,7 +425,7 @@ exports.updateProfileImage = (req, res) => {
                         res.status(400).send({
                             success: false,
                             data: [],
-                            message: "Imagen de Perfil Actualizada"
+                            message: "Error" + e
                         })
                     }
 
