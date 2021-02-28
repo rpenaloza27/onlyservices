@@ -33,5 +33,6 @@ db.service_comments = require("./service_comments.model")(sequelize, Sequelize, 
 db.service_images = require("./service_images.model")(sequelize, Sequelize);
 db.services = require("./services.model")(sequelize, Sequelize, db.users, db.service_details, db.service_images, db.service_comments,db.people,db.categories, db.categories_services);
 db.categories_services = require("./categories_services.model")(sequelize, Sequelize, db.services, db.categories);
+db.services_cities= require("./services_cities.model")(sequelize, Sequelize,db.services, db.municipios)
 db.user_services_favorites = require("./user_services_favorites.model")(sequelize, Sequelize, db.services, db.users);
 module.exports = db;

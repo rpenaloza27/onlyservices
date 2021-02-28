@@ -8,6 +8,8 @@ const categories_services = db.categories_services;
 const service_images = db.service_images;
 const service_details = db.service_details;
 const categories = db.categories;
+const municipios = db.municipios;
+const services_cities= db.services_cities;
 const { resolveUrl } = require("../services/image_url_resolver");
 const { getPagination, getPagingData } = require("../services/pagination.service");
 const fs = require("fs");
@@ -42,6 +44,26 @@ exports.create = (req, res) => {
             e || "Some error occurred while creating the Tutorial."
         });
         return;
+      }
+    }
+    if(req.body.cities){
+      for (let i = 0; i < req.body.cities.length; i++) {
+        const service_city = {
+          service_id: data.id,
+          city_id: req.body.cities[i],
+        };
+        try {
+          const data_s = await services_cities
+            .create(service_city)
+        } catch (e) {
+          res.status(400).send({
+            success: false,
+            data: [],
+            message:
+              e || "Some error occurred while creating the Tutorial."
+          });
+          return;
+        }
       }
     }
     const service_u = await services.findOneCustom(data.id)
@@ -93,42 +115,108 @@ exports.findAll = (req, res) => {
 exports.searchServices = (req, res) => {
   const { page, size } = req.query;
   const { limit, offset } = getPagination(page, size);
-  services.findAndCountAll(
-    {
-      limit,
-      offset,
-      where: {
-        [Op.or]: [
-          { name: { [Op.substring]: req.query.search } },
-          { long_description: { [Op.substring]: req.query.search } },
-          { short_description: { [Op.substring]: req.query.search } }
-        ],
-      },
-      include: [{ model: service_images, paranoid: false }, { model: user, include: people },{ model: service_comments, include:{model: user, include: people} }]
-    }
-  ).then(data => {
-    const response = getPagingData(data, page, limit, req);
-    if (data.rows.length > 0) {
-      res
-        .send({
-          succes: true,
-          data: response,
-          message: "Lista de servicios"
+  //filters city_id
+  let city_id=0;
+  if(req.query.city_id){
+    city_id=req.query.city_id
+  }
+  if(city_id==0){
+    services.findAndCountAll(
+      {
+        limit,
+        offset,
+        where: {
+          [Op.or]: [
+            { name: { [Op.substring]: req.query.search } },
+            { long_description: { [Op.substring]: req.query.search } },
+            { short_description: { [Op.substring]: req.query.search } }
+          ],
+        },
+        include: [{ model: service_images, paranoid: false }, 
+          
+          { model: user, include: 
+            {model:people} },
+          { model: service_comments, include:{model: user, include: people} },
+          {model:services_cities,include:
+            {
+              model:municipios,
+            }}
+        ]
+      }
+    ).then(data => {
+      const response = getPagingData(data, page, limit, req);
+      if (data.rows.length > 0) {
+        res
+          .send({
+            succes: true,
+            data: response,
+            message: "Lista de servicios"
+          })
+      } else {
+        res.status(400).send({
+          succes: false,
+          data: [],
+          message: "No hay servicios en esta categoría"
         })
-    } else {
+      }
+    }).catch(e => {
       res.status(400).send({
         succes: false,
         data: [],
-        message: "No hay servicios en esta categoría"
+        message: e
       })
-    }
-  }).catch(e => {
-    res.status(400).send({
-      succes: false,
-      data: [],
-      message: e
     })
-  })
+  }else{
+    services.findAndCountAll(
+      {
+        limit,
+        offset,
+        where: {
+          [Op.or]: [
+            { name: { [Op.substring]: req.query.search } },
+            { long_description: { [Op.substring]: req.query.search } },
+            { short_description: { [Op.substring]: req.query.search } }
+          ],
+        },
+        include: [{ model: service_images, paranoid: false }, 
+          
+          { model: user, include: 
+            {model:people} },
+          { model: service_comments, include:{model: user, include: people} },
+          {model:services_cities,include:
+            {
+              model:municipios,
+            },where:{
+              [Op.or]: [
+                { city_id: req.query.city_id  },
+              ],            
+            }}
+        ]
+      }
+    ).then(data => {
+      const response = getPagingData(data, page, limit, req);
+      if (data.rows.length > 0) {
+        res
+          .send({
+            succes: true,
+            data: response,
+            message: "Lista de servicios"
+          })
+      } else {
+        res.status(400).send({
+          succes: false,
+          data: [],
+          message: "No hay servicios en esta categoría"
+        })
+      }
+    }).catch(e => {
+      res.status(400).send({
+        succes: false,
+        data: [],
+        message: e
+      })
+    })
+  }
 }
 
 exports.findCategoriesServices = (req, res) => {
@@ -335,7 +423,12 @@ exports.findOne = (req, res) => {
     services
       .findOne({
         where: { id: req.params.id },
-        include: [{ model: service_images, paranoid: false }, { model: user, include: people },{ model: service_comments, include:{model: user, include: people} }]
+        include: 
+        [{ model: service_images, paranoid: false }, 
+          { model: user, include: people },
+          { model: service_comments, include:{model: user, include: people} },
+          {model:services_cities, include: municipios}
+        ]
       })
       .then(service => {
         if (service != null) {
