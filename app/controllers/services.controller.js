@@ -9,7 +9,7 @@ const service_images = db.service_images;
 const service_details = db.service_details;
 const categories = db.categories;
 const municipios = db.municipios;
-const services_cities= db.services_cities;
+const services_cities = db.services_cities;
 const { resolveUrl } = require("../services/image_url_resolver");
 const { getPagination, getPagingData } = require("../services/pagination.service");
 const fs = require("fs");
@@ -46,7 +46,7 @@ exports.create = (req, res) => {
         return;
       }
     }
-    if(req.body.cities){
+    if (req.body.cities) {
       for (let i = 0; i < req.body.cities.length; i++) {
         const service_city = {
           service_id: data.id,
@@ -87,7 +87,7 @@ exports.findAll = (req, res) => {
   services.findAll({
     limit,
     offset,
-    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments, include:{model: user, include: people} }]
+    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments, include: { model: user, include: people } }]
   })
     .then(data => {
       if (data.length > 0) {
@@ -113,50 +113,158 @@ exports.findAll = (req, res) => {
 };
 
 exports.searchServices = (req, res) => {
-  const { page, size } = req.query;
+  let { page, size, minimum, maximum } = req.query;
   const { limit, offset } = getPagination(page, size);
-  //filters city_id
-  let city_id=0;
-  if(req.query.city_id){
-    city_id=req.query.city_id
+  //filters city_id, minimum,maximum
+  let city_id = 0;
+  minimum = minimum ? minimum : 0
+  maximum = maximum ? maximum : 0
+  if (req.query.city_id) {
+    city_id = req.query.city_id
   }
-  if(city_id==0){
-    services.findAndCountAll(
+  if (city_id == 0) {
+    let object_options = {
+      limit,
+      offset,
+      where: {
+        [Op.or]: [
+          { name: { [Op.substring]: req.query.search } },
+          { long_description: { [Op.substring]: req.query.search } },
+          { short_description: { [Op.substring]: req.query.search } }
+        ],
+      },
+      include: [{ model: service_images, paranoid: false },
+
       {
-        limit,
-        offset,
-        where: {
-          [Op.or]: [
-            { name: { [Op.substring]: req.query.search } },
-            { long_description: { [Op.substring]: req.query.search } },
-            { short_description: { [Op.substring]: req.query.search } }
-          ],
-        },
-        include: [{ model: service_images, paranoid: false }, 
-          
-          { model: user, include: 
-            {model:people} },
-          { model: service_comments, include:{model: user, include: people} },
-          {model:services_cities,include:
-            {
-              model:municipios,
-            }}
-        ]
+        model: user, include:
+          { model: people }
+      },
+      { model: service_comments, include: { model: user, include: people } },
+      {
+        model: services_cities, include:
+        {
+          model: municipios,
+        }
       }
-    ).then(data => {
+      ]
+    }
+    //[Op.between]: [6, 10],    
+
+    let object_with_filters;
+    if (typeof minimum == 'undefined' && minimum > 0) {
+
+      if (typeof maximum == 'undefined' && maximum > 0) {
+        //Both Filters Maximum and minimum
+        object_with_filters = {
+          limit,
+          offset,
+          where: {
+            [Op.or]: [
+              { name: { [Op.substring]: req.query.search } },
+              { long_description: { [Op.substring]: req.query.search } },
+              { short_description: { [Op.substring]: req.query.search } },
+              { price: { [Op.between]: [minimum, maximum] } }
+            ],
+          },
+          include: [{ model: service_images, paranoid: false },
+
+          {
+            model: user, include:
+              { model: people }
+          },
+          { model: service_comments, include: { model: user, include: people } },
+          {
+            model: services_cities, include:
+            {
+              model: municipios,
+            }
+          }
+          ]
+        }
+      } else {
+        //Minimum only
+        object_with_filters = {
+          limit,
+          offset,
+          where: {
+            [Op.or]: [
+              { name: { [Op.substring]: req.query.search } },
+              { long_description: { [Op.substring]: req.query.search } },
+              { short_description: { [Op.substring]: req.query.search } },
+              { price: { [Op.gte]: minimum, } }
+            ],
+          },
+          include: [{ model: service_images, paranoid: false },
+
+          {
+            model: user, include:
+              { model: people }
+          },
+          { model: service_comments, include: { model: user, include: people } },
+          {
+            model: services_cities, include:
+            {
+              model: municipios,
+            }
+          }
+          ]
+        }
+      }
+
+    } else {
+      //Maximum only
+      if (typeof maximum == 'undefined' && maximum > 0) {
+        object_with_filters = {
+          limit,
+          offset,
+          where: {
+            [Op.or]: [
+              { name: { [Op.substring]: req.query.search } },
+              { long_description: { [Op.substring]: req.query.search } },
+              { short_description: { [Op.substring]: req.query.search } },
+              { price: { [Op.lte]: maximum, } }
+            ],
+          },
+          include: [{ model: service_images, paranoid: false },
+
+          {
+            model: user, include:
+              { model: people }
+          },
+          { model: service_comments, include: { model: user, include: people } },
+          {
+            model: services_cities, include:
+            {
+              model: municipios,
+            }
+          }
+          ]
+        }
+      } else {
+        //None price filter
+        object_with_filters = object_options;
+      }
+
+    }
+
+    services.findAndCountAll(object_with_filters).then(data => {
       const response = getPagingData(data, page, limit, req);
       if (data.rows.length > 0) {
         res
           .send({
             succes: true,
             data: response,
-            message: "Lista de servicios"
+            message: "Lista de servicios",
+            limit,
+            offset
           })
       } else {
         res.status(400).send({
           succes: false,
           data: [],
-          message: "No hay servicios en esta categoría"
+          message: "No hay servicios",
+          limit,
+          offset
         })
       }
     }).catch(e => {
@@ -166,33 +274,148 @@ exports.searchServices = (req, res) => {
         message: e
       })
     })
-  }else{
-    services.findAndCountAll(
+  } else {
+    let object_options = {
+      limit,
+      offset,
+      where: {
+        [Op.or]: [
+          { name: { [Op.substring]: req.query.search } },
+          { long_description: { [Op.substring]: req.query.search } },
+          { short_description: { [Op.substring]: req.query.search } }
+        ],
+      },
+      include: [{ model: service_images, paranoid: false },
+
       {
-        limit,
-        offset,
-        where: {
+        model: user, include:
+          { model: people }
+      },
+      { model: service_comments, include: { model: user, include: people } },
+      {
+        model: services_cities, include:
+        {
+          model: municipios,
+        }, where: {
           [Op.or]: [
-            { name: { [Op.substring]: req.query.search } },
-            { long_description: { [Op.substring]: req.query.search } },
-            { short_description: { [Op.substring]: req.query.search } }
+            { city_id: req.query.city_id },
           ],
-        },
-        include: [{ model: service_images, paranoid: false }, 
-          
-          { model: user, include: 
-            {model:people} },
-          { model: service_comments, include:{model: user, include: people} },
-          {model:services_cities,include:
-            {
-              model:municipios,
-            },where:{
-              [Op.or]: [
-                { city_id: req.query.city_id  },
-              ],            
-            }}
-        ]
+        }
       }
+      ]
+    }
+    //[Op.between]: [6, 10],    
+
+    let object_with_filters;
+    if (typeof minimum == 'undefined' && minimum > 0) {
+
+      if (typeof maximum == 'undefined' && maximum > 0) {
+        //Both Filters Maximum and minimum
+        object_with_filters = {
+          limit,
+          offset,
+          where: {
+            [Op.or]: [
+              { name: { [Op.substring]: req.query.search } },
+              { long_description: { [Op.substring]: req.query.search } },
+              { short_description: { [Op.substring]: req.query.search } },
+              { price: { [Op.between]: [minimum, maximum] } }
+            ],
+          },
+          include: [{ model: service_images, paranoid: false },
+
+          {
+            model: user, include:
+              { model: people }
+          },
+          { model: service_comments, include: { model: user, include: people } },
+          {
+            model: services_cities, include:
+            {
+              model: municipios,
+            }, where: {
+              [Op.or]: [
+                { city_id: req.query.city_id },
+              ],
+            }
+          }
+          ]
+        }
+      } else {
+        //Minimum only
+        object_with_filters = {
+          limit,
+          offset,
+          where: {
+            [Op.or]: [
+              { name: { [Op.substring]: req.query.search } },
+              { long_description: { [Op.substring]: req.query.search } },
+              { short_description: { [Op.substring]: req.query.search } },
+              { price: { [Op.gte]: minimum, } }
+            ],
+          },
+          include: [{ model: service_images, paranoid: false },
+
+          {
+            model: user, include:
+              { model: people }
+          },
+          { model: service_comments, include: { model: user, include: people } },
+          {
+            model: services_cities, include:
+            {
+              model: municipios,
+            }, where: {
+              [Op.or]: [
+                { city_id: req.query.city_id },
+              ],
+            }
+          }
+          ]
+        }
+      }
+
+    } else {
+      //Maximum only
+      if (typeof maximum == 'undefined' && maximum > 0) {
+        object_with_filters = {
+          limit,
+          offset,
+          where: {
+            [Op.or]: [
+              { name: { [Op.substring]: req.query.search } },
+              { long_description: { [Op.substring]: req.query.search } },
+              { short_description: { [Op.substring]: req.query.search } },
+              { price: { [Op.lte]: maximum, } }
+            ],
+          },
+          include: [{ model: service_images, paranoid: false },
+
+          {
+            model: user, include:
+              { model: people }
+          },
+          { model: service_comments, include: { model: user, include: people } },
+          {
+            model: services_cities, include:
+            {
+              model: municipios,
+            }, where: {
+              [Op.or]: [
+                { city_id: req.query.city_id },
+              ],
+            }
+          }
+          ]
+        }
+      } else {
+        //None price filter
+        object_with_filters = object_options;
+      }
+
+    }
+    services.findAndCountAll(
+      object_with_filters
     ).then(data => {
       const response = getPagingData(data, page, limit, req);
       if (data.rows.length > 0) {
@@ -423,12 +646,12 @@ exports.findOne = (req, res) => {
     services
       .findOne({
         where: { id: req.params.id },
-        include: 
-        [{ model: service_images, paranoid: false }, 
+        include:
+          [{ model: service_images, paranoid: false },
           { model: user, include: people },
-          { model: service_comments, include:{model: user, include: people} },
-          {model:services_cities, include: municipios}
-        ]
+          { model: service_comments, include: { model: user, include: people } },
+          { model: services_cities, include: municipios }
+          ]
       })
       .then(service => {
         if (service != null) {
@@ -462,7 +685,7 @@ exports.findServiceComments = (req, res) => {
     limit,
     offset,
     where: { service_id: req.params.service_id },
-    include: {model: user, include: people}
+    include: { model: user, include: people }
   }).then(comments => {
     const response = getPagingData(comments, page, limit, req);
     if (comments.rows.length > 0) {
@@ -483,50 +706,50 @@ exports.findServiceComments = (req, res) => {
 
 exports.deleteImage = async (req, res) => {
   const image = await service_images.findOne({
-    where:{
+    where: {
       id: req.params.id
     }
   })
   if (image != null) {
-    const env_path= enviroment.production ? 'http://157.245.112.96': enviroment.URL_LOCAL;
+    const env_path = enviroment.production ? 'http://157.245.112.96' : enviroment.URL_LOCAL;
     const url = `public/${image.url.replace(env_path, "")}`;
     fs.unlink(url, function (err) {
       if (err) {
         res.status(400).send({
-          success:false,
-          data:[{url, image_url: image.url}],
+          success: false,
+          data: [{ url, image_url: image.url }],
           message: "No se encontró la ruta del archivo " + err
         })
         return console.log(err);
       }
       service_images.destroy({
-        where:{
+        where: {
           id: req.params.id
         }
-      }).then(data_deleted=>{
+      }).then(data_deleted => {
         res.send({
           success: true,
-          data:[data_deleted],
-          message:"Imagen Eliminada"
+          data: [data_deleted],
+          message: "Imagen Eliminada"
         })
-      }).catch(e=>{
+      }).catch(e => {
         res.status(400).send({
           success: true,
-          data:[],
-          message:"No se pudo eliminar la imagen"
+          data: [],
+          message: "No se pudo eliminar la imagen"
         })
       })
-      
+
       console.log('file deleted successfully');
     });
-    
+
   } else {
     res.status(400)
-    .send({
-      success:true,
-      data:[],
-      message:"No se encontró la imagen"
-    })
+      .send({
+        success: true,
+        data: [],
+        message: "No se encontró la imagen"
+      })
   }
 }
 
@@ -564,7 +787,7 @@ exports.findServicesByUser = (req, res) => {
     limit,
     offset,
     where: { user_id: req.params.user_id },
-    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments, include: {model: user, include: people} }]
+    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments, include: { model: user, include: people } }]
   }).then(data => {
     const response = getPagingData(data, page, limit, req);
     if (data.rows.length > 0) {
