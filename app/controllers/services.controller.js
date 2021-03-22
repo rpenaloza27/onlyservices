@@ -117,11 +117,12 @@ exports.searchServices = (req, res) => {
   const { limit, offset } = getPagination(page, size);
   //filters city_id, minimum,maximum
   let city_id = 0;
-  minimum = minimum ? minimum : 0
-  maximum = maximum ? maximum : 0
+  minimum = minimum ? Number(minimum) : 0
+  maximum = maximum ? Number(maximum) : 0
   if (req.query.city_id) {
     city_id = req.query.city_id
   }
+  let t=""
   if (city_id == 0) {
     let object_options = {
       limit,
@@ -307,9 +308,10 @@ exports.searchServices = (req, res) => {
     //[Op.between]: [6, 10],    
 
     let object_with_filters;
-    if (typeof minimum == 'undefined' && minimum > 0) {
-
-      if (typeof maximum == 'undefined' && maximum > 0) {
+    if (typeof minimum != 'undefined' && minimum > 0) {
+      t="minimum"
+      if (typeof maximum != 'undefined' && maximum > 0) {
+        t="minimum maximum"
         //Both Filters Maximum and minimum
         object_with_filters = {
           limit,
@@ -319,8 +321,8 @@ exports.searchServices = (req, res) => {
               { name: { [Op.substring]: req.query.search } },
               { long_description: { [Op.substring]: req.query.search } },
               { short_description: { [Op.substring]: req.query.search } },
-              { price: { [Op.between]: [minimum, maximum] } }
             ],
+            price: { [Op.between]: [minimum, maximum] }
           },
           include: [{ model: service_images, paranoid: false },
 
@@ -351,8 +353,8 @@ exports.searchServices = (req, res) => {
               { name: { [Op.substring]: req.query.search } },
               { long_description: { [Op.substring]: req.query.search } },
               { short_description: { [Op.substring]: req.query.search } },
-              { price: { [Op.gte]: minimum, } }
             ],
+            price: { [Op.gte]: minimum, }
           },
           include: [{ model: service_images, paranoid: false },
 
@@ -377,7 +379,8 @@ exports.searchServices = (req, res) => {
 
     } else {
       //Maximum only
-      if (typeof maximum == 'undefined' && maximum > 0) {
+      if (typeof maximum != 'undefined' && maximum > 0) {
+        t="maximo";
         object_with_filters = {
           limit,
           offset,
@@ -386,8 +389,8 @@ exports.searchServices = (req, res) => {
               { name: { [Op.substring]: req.query.search } },
               { long_description: { [Op.substring]: req.query.search } },
               { short_description: { [Op.substring]: req.query.search } },
-              { price: { [Op.lte]: maximum, } }
             ],
+            price: { [Op.lte]: maximum, }
           },
           include: [{ model: service_images, paranoid: false },
 
@@ -423,7 +426,8 @@ exports.searchServices = (req, res) => {
           .send({
             succes: true,
             data: response,
-            message: "Lista de servicios"
+            message: "Lista de servicios",
+            t
           })
       } else {
         res.status(400).send({
