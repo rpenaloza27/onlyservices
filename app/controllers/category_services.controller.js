@@ -10,7 +10,7 @@ const service_images = db.service_images;
 const { getPagination, getPagingData } = require("../services/pagination.service");
 const service_comments = db.service_comments;
 const services_cities = db.services_cities;
-const municipios= db.municipios;
+const municipios = db.municipios;
 
 
 
@@ -30,7 +30,7 @@ exports.findServicesByCategories = (req, res) => {
         if (req.query.city_id) {
             city_id = req.query.city_id
         }
-        if (city_id == 0 || req.params.category_id== 20) {
+        if (city_id == 0 || req.params.category_id == 20) {
             categories_services.findAndCountAll({
                 limit,
                 offset,
@@ -145,6 +145,148 @@ exports.findServicesByCategories = (req, res) => {
     }
 
 };
+
+exports.findServicesByCategoriesSearch = (req, res) => {
+
+    if (req.params.category_id) {
+        const { page, size, search } = req.query;
+        const { limit, offset } = getPagination(page, size);
+
+        let city_id = 0;
+        if (req.query.city_id) {
+            city_id = req.query.city_id
+        }
+        if (city_id == 0 || req.params.category_id == 20) {
+            categories_services.findAndCountAll({
+                limit,
+                offset,
+                where: { category_id: req.params.category_id, },
+                include: {
+                    model: services,
+                    include: [
+                        { model: service_images, paranoid: false },
+                        { model: user, include: people },
+                        { model: user_services_favorites },
+                        {
+                            model: service_comments,
+                            include: { model: user, include: people }
+                        },
+                        {
+                            model: services_cities, include:
+                            {
+                                model: municipios,
+                            }
+                        }
+                    ],
+                    order: [
+                        [{ model: user }, 'priority', 'asc']
+                    ],
+                    where: {
+                        status: 1, 
+                        [Op.or]: [
+                            { name: { [Op.substring]: req.query.search } },
+                            { long_description: { [Op.substring]: req.query.search } },
+                            { short_description: { [Op.substring]: req.query.search } },
+                        ]
+                    }
+
+                }, attributes: { exclude: ['createdAt'] },
+
+            })
+                .then(data => {
+                    console.log("Datos", data)
+                    const response = getPagingData(data, page, limit, req);
+                    if (data.rows.length > 0) {
+                        res.send({
+                            success: true,
+                            data: response,
+                            message: "Lista de servivios "
+                        });
+                    } else {
+                        res.status(400).send({
+                            success: true,
+                            data: response,
+                            message: "No hay servicios "
+                        });
+                    }
+                })
+                .catch(err => {
+                    res.status(500).send({
+                        message:
+                            err.message || "Some error occurred while retrieving tutorials."
+                    });
+                });
+        } else {
+            categories_services.findAndCountAll({
+                limit,
+                offset,
+                where: { category_id: req.params.category_id, },
+                include: {
+                    model: services,
+                    include: [
+                        { model: service_images, paranoid: false },
+                        { model: user, include: people },
+                        { model: user_services_favorites },
+                        {
+                            model: service_comments,
+                            include: { model: user, include: people }
+                        },
+                        {
+                            model: services_cities, include:
+                            {
+                                model: municipios,
+                            }, where: {
+                                [Op.or]: [
+                                    { city_id: req.query.city_id },
+                                ],
+                            }
+                        }
+                    ],
+                    order: [
+                        [{ model: user }, 'priority', 'asc']
+                    ],
+                    where: {
+                        status: 1, 
+                        [Op.or]: [
+                            { name: { [Op.substring]: req.query.search } },
+                            { long_description: { [Op.substring]: req.query.search } },
+                            { short_description: { [Op.substring]: req.query.search } },
+                        ]
+                    }
+
+                }, attributes: { exclude: ['createdAt'] },
+
+            })
+                .then(data => {
+                    console.log("Datos", data)
+                    const response = getPagingData(data, page, limit, req);
+                    if (data.rows.length > 0) {
+                        res.send({
+                            success: true,
+                            data: response,
+                            message: "Lista de servivios "
+                        });
+                    } else {
+                        res.status(400).send({
+                            success: true,
+                            data: response,
+                            message: "No hay servicios "
+                        });
+                    }
+                })
+                .catch(err => {
+                    res.status(500).send({
+                        message:
+                            err.message || "Some error occurred while retrieving tutorials."
+                    });
+                });
+        }
+
+    }
+
+};
+
+
 
 //find Services by categories
 exports.findByCategory = (req, res) => {

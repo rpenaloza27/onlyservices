@@ -6,6 +6,7 @@ var router = require("express").Router();
 
 // Retrieve all Tutorials
 router.get("/services/:category_id", categories_services.findServicesByCategories);
+router.get("/services/search/categories/:category_id", categories_services.findServicesByCategoriesSearch);
 
 // Retrieve all published Tutorials
 // router.get("/published", tutorials.findAllPublished);
