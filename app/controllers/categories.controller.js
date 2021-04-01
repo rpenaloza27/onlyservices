@@ -17,7 +17,8 @@ exports.create = (req, res) => {
 
 // Create and Save a new Tutorial
 exports.createCategories = async (req, res) => {
-    const categories_array= req.categories;
+    const categories_array= req.body.categories;
+    console.log("Categories", categories_array)
     for (const category of categories_array) {
         // Save user in the database
         await categories.create(category) 
