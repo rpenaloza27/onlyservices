@@ -7,6 +7,7 @@ var router = require("express").Router();
 // Retrieve all Tutorials
 router.get("/", categories.findAll);
 router.get("/subcategories/:category_id", categories.findSubcategories);
+router.post("/massive", categories.createCategories);
 
 // Retrieve all published Tutorials
 // router.get("/published", tutorials.findAllPublished);

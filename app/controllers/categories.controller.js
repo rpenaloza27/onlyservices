@@ -15,6 +15,20 @@ exports.create = (req, res) => {
 
 };
 
+// Create and Save a new Tutorial
+exports.createCategories = async (req, res) => {
+    const categories_array= req.categories;
+    for (const category of categories_array) {
+        // Save user in the database
+        await categories.create(category) 
+    }
+    res.send({
+        success:true,
+        data:[],
+        message:"Categorías creadas"
+    })
+};
+
 exports.findAll = (req, res) => {
     //[Op.and]: [{ a: 5 }, { b: 6 }],
     categories

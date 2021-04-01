@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize, Sequelize, roles) => {
-    const users = sequelize.define("users", {
+    const users = sequelize.define("users_", {
         email: {
             type: DataTypes.STRING,
             unique: true
@@ -20,7 +20,7 @@ module.exports = (sequelize, Sequelize, roles) => {
         },
         status: {
             type: DataTypes.INTEGER 
-        },
+        }, 
     },  {
         timestamps: false,
     });
