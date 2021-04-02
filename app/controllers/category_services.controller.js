@@ -25,42 +25,15 @@ exports.create = (req, res) => {
 exports.findServicesByCategories = (req, res) => {
 
     if (req.params.category_id) {
-        const { page, size } = req.query;
+        let { page, size, minimum, maximum } = req.query;
         const { limit, offset } = getPagination(page, size);
         let city_id = 0;
         if (req.query.city_id) {
             city_id = req.query.city_id
         }
+
         if (city_id == 0 || req.params.category_id == 20) {
-            categories_services.findAndCountAll({
-                limit,
-                offset,
-                where: { category_id: req.params.category_id, },
-                include: {
-                    model: services,
-                    include: [
-                        { model: service_images, paranoid: false },
-                        { model: user, include: [{model:people}, {model:companies}] },
-                        { model: user_services_favorites },
-                        {
-                            model: service_comments,
-                            include: { model: user, include: [{model:people}, {model:companies}] }
-                        },
-                        {
-                            model: services_cities, include:
-                            {
-                                model: municipios,
-                            }
-                        }
-                    ],
-                    order: [
-                        [{ model: user }, 'priority', 'asc']
-                    ],
-                    where: { status: 1 }
-
-                }, attributes: { exclude: ['createdAt'] },
-
-            })
+            categories_services.findAndCountAll()
                 .then(data => {
                     console.log("Datos", data)
                     const response = getPagingData(data, page, limit, req);
@@ -93,7 +66,7 @@ exports.findServicesByCategories = (req, res) => {
                     model: services,
                     include: [
                         { model: service_images, paranoid: false },
-                        { model: user, include: [{model:people}, {model:companies}] },
+                        { model: user, include: [{ model: people }, { model: companies }] },
                         { model: user_services_favorites },
                         {
                             model: service_comments,
@@ -150,15 +123,17 @@ exports.findServicesByCategories = (req, res) => {
 exports.findServicesByCategoriesSearch = (req, res) => {
 
     if (req.params.category_id) {
-        const { page, size, search } = req.query;
+        let { page, size, minimum, maximum } = req.query;
         const { limit, offset } = getPagination(page, size);
 
         let city_id = 0;
         if (req.query.city_id) {
             city_id = req.query.city_id
         }
+        minimum = minimum ? Number(minimum) : 0
+        maximum = maximum ? Number(maximum) : 0
         if (city_id == 0 || req.params.category_id == 20) {
-            categories_services.findAndCountAll({
+            let object_options={
                 limit,
                 offset,
                 where: { category_id: req.params.category_id, },
@@ -183,7 +158,7 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                         [{ model: user }, 'priority', 'asc']
                     ],
                     where: {
-                        status: 1, 
+                        status: 1,
                         [Op.or]: [
                             { name: { [Op.substring]: req.query.search } },
                             { long_description: { [Op.substring]: req.query.search } },
@@ -193,7 +168,136 @@ exports.findServicesByCategoriesSearch = (req, res) => {
 
                 }, attributes: { exclude: ['createdAt'] },
 
-            })
+            }
+            let object_with_filters;
+            if (typeof minimum == 'undefined' && minimum > 0) {
+
+                if (typeof maximum == 'undefined' && maximum > 0) {
+                    //Both Prices Filters
+                    object_with_filters= {
+                        limit,
+                        offset,
+                        where: { category_id: req.params.category_id, },
+                        include: {
+                            model: services,
+                            include: [
+                                { model: service_images, paranoid: false },
+                                { model: user, include: [{model:people},{model:companies}] },
+                                { model: user_services_favorites },
+                                {
+                                    model: service_comments,
+                                    include: { model: user, include: [{model:people},{model:companies}] }
+                                },
+                                {
+                                    model: services_cities, include:
+                                    {
+                                        model: municipios,
+                                    }
+                                }
+                            ],
+                            order: [
+                                [{ model: user }, 'priority', 'asc']
+                            ],
+                            where: {
+                                status: 1,
+                                [Op.or]: [
+                                    { name: { [Op.substring]: req.query.search } },
+                                    { long_description: { [Op.substring]: req.query.search } },
+                                    { short_description: { [Op.substring]: req.query.search } },
+                                    
+                                ],
+                                price: { [Op.between]: [minimum, maximum] } 
+                            }
+        
+                        }, attributes: { exclude: ['createdAt'] },
+        
+                    }
+                }else{
+                    //Only minimum
+                    object_with_filters= {
+                        limit,
+                        offset,
+                        where: { category_id: req.params.category_id, },
+                        include: {
+                            model: services,
+                            include: [
+                                { model: service_images, paranoid: false },
+                                { model: user, include: [{model:people},{model:companies}] },
+                                { model: user_services_favorites },
+                                {
+                                    model: service_comments,
+                                    include: { model: user, include: [{model:people},{model:companies}] }
+                                },
+                                {
+                                    model: services_cities, include:
+                                    {
+                                        model: municipios,
+                                    }
+                                }
+                            ],
+                            order: [
+                                [{ model: user }, 'priority', 'asc']
+                            ],
+                            where: {
+                                status: 1,
+                                [Op.or]: [
+                                    { name: { [Op.substring]: req.query.search } },
+                                    { long_description: { [Op.substring]: req.query.search } },
+                                    { short_description: { [Op.substring]: req.query.search } },
+                                ],
+                                price: { [Op.gte]: minimum, }
+                            }
+        
+                        }, attributes: { exclude: ['createdAt'] },
+        
+                    }
+                }
+            }else{
+                //Maximum only
+                if (typeof maximum == 'undefined' && maximum > 0) {
+                    object_with_filters= {
+                        limit,
+                        offset,
+                        where: { category_id: req.params.category_id, },
+                        include: {
+                            model: services,
+                            include: [
+                                { model: service_images, paranoid: false },
+                                { model: user, include: [{model:people},{model:companies}] },
+                                { model: user_services_favorites },
+                                {
+                                    model: service_comments,
+                                    include: { model: user, include: [{model:people},{model:companies}] }
+                                },
+                                {
+                                    model: services_cities, include:
+                                    {
+                                        model: municipios,
+                                    }
+                                }
+                            ],
+                            order: [
+                                [{ model: user }, 'priority', 'asc']
+                            ],
+                            where: {
+                                status: 1,
+                                [Op.or]: [
+                                    { name: { [Op.substring]: req.query.search } },
+                                    { long_description: { [Op.substring]: req.query.search } },
+                                    { short_description: { [Op.substring]: req.query.search } },
+                                ],
+                                 price: { [Op.lte]: maximum, } 
+                            }
+        
+                        }, attributes: { exclude: ['createdAt'] },
+        
+                    } 
+                }else{
+                    //None price filters
+                    object_with_filters=object_options;
+                }
+            }
+            categories_services.findAndCountAll(object_with_filters)
                 .then(data => {
                     console.log("Datos", data)
                     const response = getPagingData(data, page, limit, req);
@@ -218,7 +322,7 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                     });
                 });
         } else {
-            categories_services.findAndCountAll({
+            let object_options={
                 limit,
                 offset,
                 where: { category_id: req.params.category_id, },
@@ -226,11 +330,11 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                     model: services,
                     include: [
                         { model: service_images, paranoid: false },
-                        { model: user, include: people },
+                        { model: user, include: [{model:people},{model:companies}] },
                         { model: user_services_favorites },
                         {
                             model: service_comments,
-                            include: { model: user, include: people }
+                            include: { model: user, include: [{model:people},{model:companies}] }
                         },
                         {
                             model: services_cities, include:
@@ -247,7 +351,7 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                         [{ model: user }, 'priority', 'asc']
                     ],
                     where: {
-                        status: 1, 
+                        status: 1,
                         [Op.or]: [
                             { name: { [Op.substring]: req.query.search } },
                             { long_description: { [Op.substring]: req.query.search } },
@@ -257,7 +361,142 @@ exports.findServicesByCategoriesSearch = (req, res) => {
 
                 }, attributes: { exclude: ['createdAt'] },
 
-            })
+            };
+            let object_with_filters;
+            if (typeof minimum != 'undefined' && minimum > 0) {
+                if (typeof maximum != 'undefined' && maximum > 0) {
+                    object_with_filters={
+                        limit,
+                        offset,
+                        where: { category_id: req.params.category_id, },
+                        include: {
+                            model: services,
+                            include: [
+                                { model: service_images, paranoid: false },
+                                { model: user, include: [{model:people},{model:companies}] },
+                                { model: user_services_favorites },
+                                {
+                                    model: service_comments,
+                                    include: { model: user, include: [{model:people},{model:companies}] }
+                                },
+                                {
+                                    model: services_cities, include:
+                                    {
+                                        model: municipios,
+                                    }, where: {
+                                        [Op.or]: [
+                                            { city_id: req.query.city_id },
+                                        ],
+                                    }
+                                }
+                            ],
+                            order: [
+                                [{ model: user }, 'priority', 'asc']
+                            ],
+                            where: {
+                                status: 1,
+                                [Op.or]: [
+                                    { name: { [Op.substring]: req.query.search } },
+                                    { long_description: { [Op.substring]: req.query.search } },
+                                    { short_description: { [Op.substring]: req.query.search } },
+                                ],
+                                price: { [Op.between]: [minimum, maximum] }
+                            }
+        
+                        }, attributes: { exclude: ['createdAt'] },
+        
+                    };
+                }else{
+                    object_with_filters={
+                        limit,
+                        offset,
+                        where: { category_id: req.params.category_id, },
+                        include: {
+                            model: services,
+                            include: [
+                                { model: service_images, paranoid: false },
+                                { model: user, include: [{model:people},{model:companies}] },
+                                { model: user_services_favorites },
+                                {
+                                    model: service_comments,
+                                    include: { model: user, include: [{model:people},{model:companies}] }
+                                },
+                                {
+                                    model: services_cities, include:
+                                    {
+                                        model: municipios,
+                                    }, where: {
+                                        [Op.or]: [
+                                            { city_id: req.query.city_id },
+                                        ],
+                                    }
+                                }
+                            ],
+                            order: [
+                                [{ model: user }, 'priority', 'asc']
+                            ],
+                            where: {
+                                status: 1,
+                                [Op.or]: [
+                                    { name: { [Op.substring]: req.query.search } },
+                                    { long_description: { [Op.substring]: req.query.search } },
+                                    { short_description: { [Op.substring]: req.query.search } },
+                                ],
+                                price: { [Op.gte]: minimum, }
+                            }
+        
+                        }, attributes: { exclude: ['createdAt'] },
+        
+                    };
+                }
+            }else{
+                if (typeof maximum != 'undefined' && maximum > 0) {
+                    object_with_filters={
+                        limit,
+                        offset,
+                        where: { category_id: req.params.category_id, },
+                        include: {
+                            model: services,
+                            include: [
+                                { model: service_images, paranoid: false },
+                                { model: user, include: [{model:people},{model:companies}] },
+                                { model: user_services_favorites },
+                                {
+                                    model: service_comments,
+                                    include: { model: user, include: [{model:people},{model:companies}] }
+                                },
+                                {
+                                    model: services_cities, include:
+                                    {
+                                        model: municipios,
+                                    }, where: {
+                                        [Op.or]: [
+                                            { city_id: req.query.city_id },
+                                        ],
+                                    }
+                                }
+                            ],
+                            order: [
+                                [{ model: user }, 'priority', 'asc']
+                            ],
+                            where: {
+                                status: 1,
+                                [Op.or]: [
+                                    { name: { [Op.substring]: req.query.search } },
+                                    { long_description: { [Op.substring]: req.query.search } },
+                                    { short_description: { [Op.substring]: req.query.search } },
+                                ],
+                                price: { [Op.lte]: maximum, }
+                            }
+        
+                        }, attributes: { exclude: ['createdAt'] },
+        
+                    };
+                }else{
+                    object_with_filters=object_options;
+                }
+            }
+            categories_services.findAndCountAll(object_with_filters)
                 .then(data => {
                     console.log("Datos", data)
                     const response = getPagingData(data, page, limit, req);
