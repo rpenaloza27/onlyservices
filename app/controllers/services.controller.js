@@ -153,9 +153,9 @@ exports.searchServices = (req, res) => {
     //[Op.between]: [6, 10],    
 
     let object_with_filters;
-    if (typeof minimum == 'undefined' && minimum > 0) {
+    if (typeof minimum != 'undefined' && minimum > 0) {
 
-      if (typeof maximum == 'undefined' && maximum > 0) {
+      if (typeof maximum != 'undefined' && maximum > 0) {
         //Both Filters Maximum and minimum
         object_with_filters = {
           limit,
@@ -215,7 +215,7 @@ exports.searchServices = (req, res) => {
 
     } else {
       //Maximum only
-      if (typeof maximum == 'undefined' && maximum > 0) {
+      if (typeof maximum != 'undefined' && maximum > 0) {
         object_with_filters = {
           limit,
           offset,

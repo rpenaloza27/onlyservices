@@ -132,11 +132,13 @@ exports.findServicesByCategoriesSearch = (req, res) => {
         }
         minimum = minimum ? Number(minimum) : 0
         maximum = maximum ? Number(maximum) : 0
+        console.log("Maximum", maximum);
+        let t = ""
         if (city_id == 0 || req.params.category_id == 20) {
             let object_options={
                 limit,
                 offset,
-                where: { category_id: req.params.category_id, },
+                where: { category_id: Number(req.params.category_id), },
                 include: {
                     model: services,
                     include: [
@@ -170,14 +172,15 @@ exports.findServicesByCategoriesSearch = (req, res) => {
 
             }
             let object_with_filters;
-            if (typeof minimum == 'undefined' && minimum > 0) {
-
-                if (typeof maximum == 'undefined' && maximum > 0) {
+            if (typeof minimum != 'undefined' && minimum > 0) {
+                t="Minimum"
+                if (typeof maximum != 'undefined' && maximum > 0) {
+                    t="Minimum and maximum"
                     //Both Prices Filters
                     object_with_filters= {
                         limit,
                         offset,
-                        where: { category_id: req.params.category_id, },
+                        where: { category_id: Number(req.params.category_id), },
                         include: {
                             model: services,
                             include: [
@@ -217,7 +220,7 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                     object_with_filters= {
                         limit,
                         offset,
-                        where: { category_id: req.params.category_id, },
+                        where: { category_id: Number(req.params.category_id), },
                         include: {
                             model: services,
                             include: [
@@ -254,11 +257,12 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                 }
             }else{
                 //Maximum only
-                if (typeof maximum == 'undefined' && maximum > 0) {
+                t="Maximum"
+                if (typeof maximum != 'undefined' && maximum > 0) {
                     object_with_filters= {
                         limit,
                         offset,
-                        where: { category_id: req.params.category_id, },
+                        where: { category_id: Number(req.params.category_id), },
                         include: {
                             model: services,
                             include: [
@@ -293,10 +297,12 @@ exports.findServicesByCategoriesSearch = (req, res) => {
         
                     } 
                 }else{
+                    t="Non filters"
                     //None price filters
                     object_with_filters=object_options;
                 }
             }
+            console.log("Filters",object_with_filters);
             categories_services.findAndCountAll(object_with_filters)
                 .then(data => {
                     console.log("Datos", data)
@@ -305,12 +311,14 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                         res.send({
                             success: true,
                             data: response,
-                            message: "Lista de servivios "
+                            message: "Lista de servivios ",
+                            t,
+                            query:req.query
                         });
                     } else {
                         res.status(400).send({
-                            success: true,
-                            data: response,
+                            success: false,
+                            data: req.query,
                             message: "No hay servicios "
                         });
                     }
@@ -496,6 +504,7 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                     object_with_filters=object_options;
                 }
             }
+            console.log("Filters 2", object_with_filters)
             categories_services.findAndCountAll(object_with_filters)
                 .then(data => {
                     console.log("Datos", data)
