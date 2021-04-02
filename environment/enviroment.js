@@ -1,5 +1,5 @@
 module.exports = {
     production: true,
-    URL : "157.245.112.96/",
+    URL : "https://funcontes.org/",
     URL_LOCAL : "http://localhost:3000/"
 } 

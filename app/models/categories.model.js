@@ -6,7 +6,7 @@ module.exports = (sequelize, Sequelize) => {
             type: DataTypes.STRING,
         },
         icon: {
-            type: DataTypes.INTEGER 
+            type: DataTypes.STRING 
         },
         parent_id: {
             type: DataTypes.INTEGER 
