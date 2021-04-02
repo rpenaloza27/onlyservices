@@ -715,7 +715,7 @@ exports.deleteImage = async (req, res) => {
     }
   })
   if (image != null) {
-    const env_path = enviroment.production ? 'http://157.245.112.96' : enviroment.URL_LOCAL;
+    const env_path = enviroment.production ? enviroment.URL : enviroment.URL_LOCAL;
     const url = `public/${image.url.replace(env_path, "")}`;
     fs.unlink(url, function (err) {
       if (err) {

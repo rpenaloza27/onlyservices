@@ -1,3 +1,4 @@
+const { companies } = require("../models");
 const db = require("../models");
 const categories_services = db.categories_services;
 const services = db.services;
@@ -43,7 +44,7 @@ exports.findServicesByCategories = (req, res) => {
                         { model: user_services_favorites },
                         {
                             model: service_comments,
-                            include: { model: user, include: people }
+                            include: { model: user, include: [{mpdel:people}, {model:companies}] }
                         },
                         {
                             model: services_cities, include:

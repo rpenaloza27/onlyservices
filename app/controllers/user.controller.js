@@ -375,7 +375,7 @@ exports.updateProfileImage = (req, res) => {
                 if (person) {
                     try {
                         if (person.photo) {
-                            const env_path = enviroment.production ? 'http://157.245.112.96' : enviroment.URL_LOCAL;
+                            const env_path = enviroment.production ? enviroment.URL : enviroment.URL_LOCAL;
                             const url = `public/${person.photo.replace(env_path, "")}`;
                             fs.unlink(url, async function (err) {
                                 if (err) {
