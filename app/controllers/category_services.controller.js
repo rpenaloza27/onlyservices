@@ -44,7 +44,7 @@ exports.findServicesByCategories = (req, res) => {
                         { model: user_services_favorites },
                         {
                             model: service_comments,
-                            include: { model: user, include: [{mpdel:people}, {model:companies}] }
+                            include: { model: user, include: [{model:people}, {model:companies}] }
                         },
                         {
                             model: services_cities, include:
@@ -93,7 +93,7 @@ exports.findServicesByCategories = (req, res) => {
                     model: services,
                     include: [
                         { model: service_images, paranoid: false },
-                        { model: user, include: people },
+                        { model: user, include: [{model:people}, {model:companies}] },
                         { model: user_services_favorites },
                         {
                             model: service_comments,
