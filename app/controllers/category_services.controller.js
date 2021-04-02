@@ -40,7 +40,7 @@ exports.findServicesByCategories = (req, res) => {
                     model: services,
                     include: [
                         { model: service_images, paranoid: false },
-                        { model: user, include: people },
+                        { model: user, include: [{model:people}, {model:companies}] },
                         { model: user_services_favorites },
                         {
                             model: service_comments,
