@@ -14,6 +14,7 @@ const { resolveUrl } = require("../services/image_url_resolver");
 const { getPagination, getPagingData } = require("../services/pagination.service");
 const fs = require("fs");
 const enviroment = require("../../environment/enviroment");
+const { resolveNaptr } = require("dns");
 
 
 
@@ -474,6 +475,43 @@ exports.findCategoriesServices = (req, res) => {
     })
   })
 }
+
+exports.findServicesFeatured = (req,res)=>{
+  services.findAll({
+    where: {
+      number_of_visits: { [Op.gte]: 8 }
+    },
+    include: [{ model: service_images, paranoid: false },
+
+      {
+        model: user, include:
+          { model: people }
+      },
+      { model: service_comments, include: { model: user, include: people } },
+      {
+        model: services_cities, include:
+        {
+          model: municipios,
+        }
+      }
+      ]
+  }).then(data=> {
+    if(data.length>0){
+      res.send({
+        success:true,
+        data,
+        message:"Lista de servicios destacados"
+      })
+    }else{
+      res.status(400).send({
+        success:false,
+        data:[],
+        message:"No hay servicios destacados"
+      })
+    }
+  })
+}
+
 
 exports.createCommentService = async (req, res) => {
   service_comments.create({

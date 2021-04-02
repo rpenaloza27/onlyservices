@@ -17,6 +17,7 @@ router.put("/update/:service_id", services.update)
 router.put("/update/add_visit/:service_id", services.addVisit)
 router.delete("/delete/:service_id", services.delete);
 router.delete("/delete/image/:id", services.deleteImage);
+router.get("/featured/all", services.findServicesFeatured);
 
 
 // Retrieve all published Tutorials
