@@ -15,6 +15,7 @@ const { getPagination, getPagingData } = require("../services/pagination.service
 const fs = require("fs");
 const enviroment = require("../../environment/enviroment");
 const { resolveNaptr } = require("dns");
+const { companies } = require("../models");
 
 
 
@@ -485,9 +486,9 @@ exports.findServicesFeatured = (req,res)=>{
 
       {
         model: user, include:
-          { model: people }
+          [{ model: people },{model:companies}]
       },
-      { model: service_comments, include: { model: user, include: people } },
+      { model: service_comments, include: { model: user, include: [{ model: people },{model:companies}] } },
       {
         model: services_cities, include:
         {
