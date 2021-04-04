@@ -13,7 +13,7 @@ const getPagingData =(data,page,limit, req)=>{
     const total_pages= Math.ceil(total/limit);
     var next_page = req.protocol + '://' + req.get('host') + req.originalUrl;
     next_page =next_page.replace("page="+page, "page="+(Number(page)+1))
-    return {total, rows, total_pages, current_page, next_page};
+    return {total:rows ?rows.length:0, rows, total_pages, current_page, next_page};
 }
 
 module.exports={
