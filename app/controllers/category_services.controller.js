@@ -33,7 +33,43 @@ exports.findServicesByCategories = (req, res) => {
         }
 
         if (city_id == 0 || req.params.category_id == 20) {
-            categories_services.findAndCountAll()
+            let object_options={
+                limit,
+                offset,
+                where: { category_id: Number(req.params.category_id), },
+                include: {
+                    model: services,
+                    include: [
+                        { model: service_images, paranoid: false },
+                        { model: user, include: people },
+                        { model: user_services_favorites },
+                        {
+                            model: service_comments,
+                            include: { model: user, include: people }
+                        },
+                        {
+                            model: services_cities, include:
+                            {
+                                model: municipios,
+                            }
+                        }
+                    ],
+                    order: [
+                        [{ model: user }, 'priority', 'asc']
+                    ],
+                    where: {
+                        status: 1,
+                        [Op.or]: [
+                            { name: { [Op.substring]: req.query.search } },
+                            { long_description: { [Op.substring]: req.query.search } },
+                            { short_description: { [Op.substring]: req.query.search } },
+                        ]
+                    }
+
+                }, attributes: { exclude: ['createdAt'] },
+
+            }
+            categories_services.findAndCountAll(object_options)
                 .then(data => {
                     console.log("Datos", data)
                     const response = getPagingData(data, page, limit, req);
