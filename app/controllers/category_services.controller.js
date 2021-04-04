@@ -57,14 +57,6 @@ exports.findServicesByCategories = (req, res) => {
                     order: [
                         [{ model: user }, 'priority', 'asc']
                     ],
-                    where: {
-                        status: 1,
-                        [Op.or]: [
-                            { name: { [Op.substring]: req.query.search } },
-                            { long_description: { [Op.substring]: req.query.search } },
-                            { short_description: { [Op.substring]: req.query.search } },
-                        ]
-                    }
 
                 }, attributes: { exclude: ['createdAt'] },
 
