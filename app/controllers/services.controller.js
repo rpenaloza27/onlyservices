@@ -1,4 +1,5 @@
 const db = require("../models");
+const { payment_types } = require("../models");
 const services = db.services;
 const user = db.users;
 const people = db.people;
@@ -14,7 +15,7 @@ const { resolveUrl } = require("../services/image_url_resolver");
 const { getPagination, getPagingData } = require("../services/pagination.service");
 const fs = require("fs");
 const enviroment = require("../../environment/enviroment");
-const { resolveNaptr } = require("dns");
+
 const { companies } = require("../models");
 
 
@@ -27,7 +28,8 @@ exports.create = (req, res) => {
     short_description: req.body.short_description ? req.body.short_description : '',
     user_id: req.body.user_id,
     long_description: req.body.long_description ? req.body.long_description : '',
-    price: req.body.price ? req.body.price : 0
+    price: req.body.price ? req.body.price : 0,
+    payment_type: req.body.payment_type ? req.body.payment_type : 0,
   };
   services.create(service).then(async data => {
     for (let i = 0; i < req.body.categories.length; i++) {
@@ -89,7 +91,7 @@ exports.findAll = (req, res) => {
   services.findAll({
     limit,
     offset,
-    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments, include: { model: user, include: people } }]
+    include: [{ model: payment_types,as: 'Payment_Type', }, { model: service_images, paranoid: false }, { model: user, include: [{ model: people }, { model: companies }] }, { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } }]
   })
     .then(data => {
       if (data.length > 0) {
@@ -124,7 +126,7 @@ exports.searchServices = (req, res) => {
   if (req.query.city_id) {
     city_id = req.query.city_id
   }
-  let t=""
+  let t = ""
   if (city_id == 0) {
     let object_options = {
       limit,
@@ -136,19 +138,20 @@ exports.searchServices = (req, res) => {
           { short_description: { [Op.substring]: req.query.search } }
         ],
       },
-      include: [{ model: service_images, paranoid: false },
-
-      {
-        model: user, include:
-          { model: people }
-      },
-      { model: service_comments, include: { model: user, include: people } },
-      {
-        model: services_cities, include:
+      include: [
+        { model: service_images, paranoid: false },
+        { model: payment_types,as: 'Payment_Type', },
         {
-          model: municipios,
+          model: user, include:
+            [{ model: people }, { model: companies }]
+        },
+        { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
+        {
+          model: services_cities, include:
+          {
+            model: municipios,
+          }
         }
-      }
       ]
     }
     //[Op.between]: [6, 10],    
@@ -170,12 +173,12 @@ exports.searchServices = (req, res) => {
             ],
           },
           include: [{ model: service_images, paranoid: false },
-
+          { model: payment_types,as: 'Payment_Type', },
           {
             model: user, include:
-              { model: people }
+              [{ model: people }, { model: companies }]
           },
-          { model: service_comments, include: { model: user, include: people } },
+          { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
           {
             model: services_cities, include:
             {
@@ -198,12 +201,12 @@ exports.searchServices = (req, res) => {
             ],
           },
           include: [{ model: service_images, paranoid: false },
-
+          { model: payment_types,as: 'Payment_Type', },
           {
             model: user, include:
-              { model: people }
+              [{ model: people }, { model: companies }]
           },
-          { model: service_comments, include: { model: user, include: people } },
+          { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
           {
             model: services_cities, include:
             {
@@ -229,12 +232,12 @@ exports.searchServices = (req, res) => {
             ],
           },
           include: [{ model: service_images, paranoid: false },
-
+          { model: payment_types,as: 'Payment_Type', },
           {
             model: user, include:
-              { model: people }
+              [{ model: people }, { model: companies }]
           },
-          { model: service_comments, include: { model: user, include: people } },
+          { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
           {
             model: services_cities, include:
             {
@@ -271,6 +274,7 @@ exports.searchServices = (req, res) => {
         })
       }
     }).catch(e => {
+      console.log("Error",e)
       res.status(400).send({
         succes: false,
         data: [],
@@ -292,9 +296,9 @@ exports.searchServices = (req, res) => {
 
       {
         model: user, include:
-          { model: people }
+          [{ model: people }, { model: companies }]
       },
-      { model: service_comments, include: { model: user, include: people } },
+      { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
       {
         model: services_cities, include:
         {
@@ -311,9 +315,9 @@ exports.searchServices = (req, res) => {
 
     let object_with_filters;
     if (typeof minimum != 'undefined' && minimum > 0) {
-      t="minimum"
+      t = "minimum"
       if (typeof maximum != 'undefined' && maximum > 0) {
-        t="minimum maximum"
+        t = "minimum maximum"
         //Both Filters Maximum and minimum
         object_with_filters = {
           limit,
@@ -330,9 +334,9 @@ exports.searchServices = (req, res) => {
 
           {
             model: user, include:
-              { model: people }
+              [{ model: people }, { model: companies }]
           },
-          { model: service_comments, include: { model: user, include: people } },
+          { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
           {
             model: services_cities, include:
             {
@@ -362,9 +366,9 @@ exports.searchServices = (req, res) => {
 
           {
             model: user, include:
-              { model: people }
+              [{ model: people }, { model: companies }]
           },
-          { model: service_comments, include: { model: user, include: people } },
+          { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
           {
             model: services_cities, include:
             {
@@ -382,7 +386,7 @@ exports.searchServices = (req, res) => {
     } else {
       //Maximum only
       if (typeof maximum != 'undefined' && maximum > 0) {
-        t="maximo";
+        t = "maximo";
         object_with_filters = {
           limit,
           offset,
@@ -398,9 +402,9 @@ exports.searchServices = (req, res) => {
 
           {
             model: user, include:
-              { model: people }
+              [{ model: people }, { model: companies }]
           },
-          { model: service_comments, include: { model: user, include: people } },
+          { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
           {
             model: services_cities, include:
             {
@@ -477,37 +481,37 @@ exports.findCategoriesServices = (req, res) => {
   })
 }
 
-exports.findServicesFeatured = (req,res)=>{
+exports.findServicesFeatured = (req, res) => {
   services.findAll({
     where: {
       number_of_visits: { [Op.gte]: 8 }
     },
     include: [{ model: service_images, paranoid: false },
-
+      { model: payment_types,as: 'Payment_Type', },
+    {
+      model: user, include:
+        [{ model: people }, { model: companies }]
+    },
+    { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
+    {
+      model: services_cities, include:
       {
-        model: user, include:
-          [{ model: people },{model:companies}]
-      },
-      { model: service_comments, include: { model: user, include: [{ model: people },{model:companies}] } },
-      {
-        model: services_cities, include:
-        {
-          model: municipios,
-        }
+        model: municipios,
       }
-      ]
-  }).then(data=> {
-    if(data.length>0){
+    }
+    ]
+  }).then(data => {
+    if (data.length > 0) {
       res.send({
-        success:true,
+        success: true,
         data,
-        message:"Lista de servicios destacados"
+        message: "Lista de servicios destacados"
       })
-    }else{
+    } else {
       res.status(400).send({
-        success:false,
-        data:[],
-        message:"No hay servicios destacados"
+        success: false,
+        data: [],
+        message: "No hay servicios destacados"
       })
     }
   })
@@ -537,6 +541,7 @@ exports.createCommentService = async (req, res) => {
         await service_u.save()
       } catch (e) {
         res.send({
+
           success: false,
           data: [],
           message: "Can't update the service" + e
@@ -690,8 +695,10 @@ exports.findOne = (req, res) => {
       .findOne({
         where: { id: req.params.id },
         include:
-          [{ model: service_images, paranoid: false },
-          { model: user, include: people },
+          [
+            { model: payment_types,as: 'Payment_Type', },
+            { model: service_images, paranoid: false },
+          { model: user, include: [{ model: people }, { model: companies }] },
           { model: service_comments, include: { model: user, include: people } },
           { model: services_cities, include: municipios }
           ]
@@ -728,7 +735,7 @@ exports.findServiceComments = (req, res) => {
     limit,
     offset,
     where: { service_id: req.params.service_id },
-    include: { model: user, include: people }
+    include: { model: user, include: [{ model: people }, { model: companies }] }
   }).then(comments => {
     const response = getPagingData(comments, page, limit, req);
     if (comments.rows.length > 0) {
@@ -830,7 +837,7 @@ exports.findServicesByUser = (req, res) => {
     limit,
     offset,
     where: { user_id: req.params.user_id },
-    include: [{ model: service_images, paranoid: false }, { model: user, include: people }, { model: service_comments, include: { model: user, include: people } }]
+    include: [{ model: payment_types,as: 'Payment_Type', },{ model: service_images, paranoid: false }, { model: user, include: [{ model: people }, { model: companies }] }, { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } }]
   }).then(data => {
     const response = getPagingData(data, page, limit, req);
     if (data.rows.length > 0) {
@@ -870,7 +877,8 @@ exports.update = (req, res) => {
           name: req.body.name,
           short_description: req.body.short_description,
           long_description: req.body.long_description,
-          price: req.body.price
+          price: req.body.price,
+          payment_type: req.body.payment_type? req.body.payment_type:undefined
         }, { where: { id: req.params.service_id } })
           .then(data => {
             res.send({

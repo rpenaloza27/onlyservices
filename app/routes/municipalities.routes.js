@@ -7,6 +7,7 @@ var router = require("express").Router();
 // Retrieve all Tutorials
 router.get("/", municipalities.findAll);
 router.get("/:department", municipalities.findByDepartment);
+router.get("/getByName/:city", municipalities.findOneByName); 
 
 // Retrieve all published Tutorials
 // router.get("/published", tutorials.findAllPublished);

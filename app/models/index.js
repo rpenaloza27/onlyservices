@@ -36,6 +36,7 @@ db.services = require("./services.model")(sequelize, Sequelize, db.users, db.ser
 db.categories_services = require("./categories_services.model")(sequelize, Sequelize, db.services, db.categories);
 db.services_cities= require("./services_cities.model")(sequelize, Sequelize,db.services, db.municipios)
 db.user_services_favorites = require("./user_services_favorites.model")(sequelize, Sequelize, db.services, db.users);
+db.payment_types = require('./payment_types.model')(sequelize,Sequelize,db.services);
 const models = Object.keys(db).filter(key=> key!='Sequelize' && key!='sequelize' && key!='module')
 models.forEach(async key=>{
   try{

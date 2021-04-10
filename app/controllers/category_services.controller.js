@@ -1,4 +1,4 @@
-const { companies } = require("../models");
+const { companies, payment_types } = require("../models");
 const db = require("../models");
 const categories_services = db.categories_services;
 const services = db.services;
@@ -40,8 +40,9 @@ exports.findServicesByCategories = (req, res) => {
                 include: {
                     model: services,
                     include: [
+                        { model: payment_types,as: 'Payment_Type', },
                         { model: service_images, paranoid: false },
-                        { model: user, include: people },
+                        { model: user, include: [{model:people},{model:companies}] },
                         { model: user_services_favorites },
                         {
                             model: service_comments,
@@ -93,6 +94,7 @@ exports.findServicesByCategories = (req, res) => {
                 include: {
                     model: services,
                     include: [
+                        { model: payment_types,as: 'Payment_Type', },
                         { model: service_images, paranoid: false },
                         { model: user, include: [{ model: people }, { model: companies }] },
                         { model: user_services_favorites },
@@ -170,12 +172,13 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                 include: {
                     model: services,
                     include: [
+                        { model: payment_types,as: 'Payment_Type', },
                         { model: service_images, paranoid: false },
-                        { model: user, include: people },
+                        { model: user, include: [{model:people},{model:companies}] },
                         { model: user_services_favorites },
                         {
                             model: service_comments,
-                            include: { model: user, include: people }
+                            include: { model: user, include: [{model:people},{model:companies}] }
                         },
                         {
                             model: services_cities, include:
@@ -212,6 +215,7 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                         include: {
                             model: services,
                             include: [
+                                { model: payment_types,as: 'Payment_Type', },
                                 { model: service_images, paranoid: false },
                                 { model: user, include: [{model:people},{model:companies}] },
                                 { model: user_services_favorites },
@@ -252,6 +256,7 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                         include: {
                             model: services,
                             include: [
+                                { model: payment_types,as: 'Payment_Type', },
                                 { model: service_images, paranoid: false },
                                 { model: user, include: [{model:people},{model:companies}] },
                                 { model: user_services_favorites },
@@ -294,6 +299,7 @@ exports.findServicesByCategoriesSearch = (req, res) => {
                         include: {
                             model: services,
                             include: [
+                                { model: payment_types,as: 'Payment_Type', },
                                 { model: service_images, paranoid: false },
                                 { model: user, include: [{model:people},{model:companies}] },
                                 { model: user_services_favorites },

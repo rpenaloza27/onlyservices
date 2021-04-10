@@ -7,6 +7,7 @@ const categories_services_routes = require("./categoy_services.routes");
 const services_routes = require("./services.routes");
 const categories_routes = require("./categories.routes");
 const favorites_routes = require("./user_services_favorites.routes");
+const payment_types = require("./payment_types.routes")
 module.exports = (app) => {
     app.use("/countries", countries_routes);
     app.use("/departments", departments_routes);
@@ -17,4 +18,6 @@ module.exports = (app) => {
     app.use("/services", services_routes);
     app.use("/categories", categories_routes);
     app.use("/favorites", favorites_routes);
+    //payment_types
+    app.use("/payment_types", payment_types);
 }

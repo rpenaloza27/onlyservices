@@ -24,6 +24,10 @@ module.exports = (sequelize, Sequelize, users, details, images, comments, people
         qualification: {
             type: DataTypes.INTEGER
         },
+        payment_type:{
+            type: DataTypes.INTEGER,
+            defaultValue: 1 
+        },
         status: {
             type: DataTypes.INTEGER
         },
@@ -47,6 +51,7 @@ module.exports = (sequelize, Sequelize, users, details, images, comments, people
         foreignKey: 'service_id',
         sourceKey: 'id',
     });
+    
     
 
     services.exists = async (id) => {

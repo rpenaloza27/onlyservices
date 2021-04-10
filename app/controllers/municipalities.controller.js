@@ -75,9 +75,36 @@ exports.findByDepartment = (req, res) => {
     
 };
 
-// Find a single Tutorial with an id
-exports.findOne = (req, res) => {
-  
+// Find a single City with an id
+exports.findOneByName = (req, res) => {
+  if(req.params.city){
+    municipios.findOne({
+      where :{
+        name: { [Op.substring]: req.params.city.toUpperCase() } 
+      },
+      include : departamentos
+    }).then(data=>{
+      if(data){
+        res.send({
+          success:true,
+          data:[data],
+          message:"Ciudad"
+        })
+      }else{
+        res.status(400).send({
+          success:true,
+          data:[],
+          message:"Ciudad no encontrada"
+        })
+      }
+    })
+  }else{
+    res.send({
+      success:false,
+      data:[],
+      message:"la ciudad es requerida"
+    })
+  }
 };
 
 // Update a Tutorial by the id in the request
