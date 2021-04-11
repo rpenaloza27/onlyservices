@@ -737,6 +737,7 @@ exports.findServiceComments = (req, res) => {
     where: { service_id: req.params.service_id },
     include: { model: user, include: [{ model: people }, { model: companies }] }
   }).then(comments => {
+    
     const response = getPagingData(comments, page, limit, req);
     if (comments.rows.length > 0) {
       res.send({
@@ -879,7 +880,7 @@ exports.update = (req, res) => {
           long_description: req.body.long_description,
           price: req.body.price,
           payment_type: req.body.payment_type? req.body.payment_type:undefined
-        }, { where: { id: req.params.service_id } })
+        }, { where: { id: req.params.service_id } }) 
           .then(data => {
             res.send({
               succes: true,
