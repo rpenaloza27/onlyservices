@@ -15,5 +15,9 @@ module.exports = (sequelize, Sequelize, departamentos) => {
         foreignKey: 'id',
         sourceKey: 'departamento_id',
     })
+    departamentos.hasMany(municipios, 
+        {as: 'municipalities', constraints: false, allowNull:true, 
+        defaultValue:null,foreignKey: 'departamento_id',
+        sourceKey: 'id',});
     return municipios;
 };

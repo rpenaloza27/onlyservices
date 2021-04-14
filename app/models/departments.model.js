@@ -6,7 +6,7 @@ module.exports = (sequelize, Sequelize, countries) => {
             type: DataTypes.STRING,
         },
         country_id: {
-            type: DataTypes.INTEGER 
+            type: DataTypes.INTEGER
         },
     }, {
         timestamps: false,
@@ -14,7 +14,15 @@ module.exports = (sequelize, Sequelize, countries) => {
     departamentos.hasOne(countries, {
         foreignKey: 'id',
         sourceKey: 'country_id',
-    })
+    });
+    countries.hasMany(
+        departamentos, {
+        as: 'departments',
+        constraints: false, allowNull: true,
+        defaultValue: null,
+        foreignKey: 'country_id',
+        sourceKey: 'id',
+    });
 
     return departamentos;
 };

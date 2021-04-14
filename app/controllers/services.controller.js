@@ -1,5 +1,5 @@
 const db = require("../models");
-const { payment_types } = require("../models");
+const { payment_types, departments, countries } = require("../models");
 const services = db.services;
 const user = db.users;
 const people = db.people;
@@ -50,23 +50,105 @@ exports.create = (req, res) => {
         return;
       }
     }
-    if (req.body.cities) {
-      for (let i = 0; i < req.body.cities.length; i++) {
-        const service_city = {
-          service_id: data.id,
-          city_id: req.body.cities[i],
-        };
-        try {
-          const data_s = await services_cities
-            .create(service_city)
-        } catch (e) {
-          res.status(400).send({
-            success: false,
-            data: [],
-            message:
-              e || "Some error occurred while creating the Tutorial."
-          });
+    if(req.body.scale_type){
+      switch(req.body.scale_type){
+        case 'city':
+          const service_city ={
+            service_id: data.id,
+            city_id: req.body.city_id,
+          }
+          try {
+            const data_s = await services_cities
+              .create(service_city)
+          } catch (e) {
+            res.status(400).send({
+              success: false,
+              data: [],
+              message:
+                e || "Some error occurred while creating the Tutorial."
+            });
+            return;
+          }
+          break;
+        case 'departament':
+          const departament = req.body.departament || 2;
+          const cities_ = await municipios.findAll({
+            where:{
+              departamento_id: departament
+            }
+          })
+          for (let i = 0; i < cities_.length; i++) {
+            const service_city = {
+              service_id: data.id,
+              city_id: cities_[i].id,
+            };
+            try {
+              const data_s = await services_cities
+                .create(service_city)
+            } catch (e) {
+              res.status(400).send({
+                success: false,
+                data: [],
+                message:
+                  e || "Some error occurred while creating the Tutorial."
+              });
+              return;
+            }
+          }
+          break;
+        case 'country':
+          const country = req.body.country || 52;
+          const cities_of_country = await countries.findOne({
+            where :{
+              id: country
+            },
+            include:[{model:departments ,as:'departments',include:{model:municipios, as:'municipalities'}}]
+          })
+          const cities=[];
+          if(cities_of_country!=null){
+            const cities_muni =cities_of_country.dataValues;
+            console.log("Country", cities_muni)
+            for(let i=0;i<cities_muni.departments.length;i++){
+              console.log("Department")
+              const depart_cities = cities_of_country.departments[i].municipalities;
+              for(let j=0;j<depart_cities.length;j++){
+                console.log("cities")
+                const service_city = {
+                  service_id: data.id,
+                  city_id: depart_cities[j].id,
+                };
+                cities.push(service_city);
+              }
+            }
+            await services_cities.bulkCreate(cities)
+          }
+          res.send({
+            success:true,
+            data:[cities_of_country],
+            message: "No se creé el servicio"
+          })
           return;
+          break;
+      }
+    }else{
+      if (req.body.cities) {
+        for (let i = 0; i < req.body.cities.length; i++) {
+          const service_city = {
+            service_id: data.id,
+            city_id: req.body.cities[i],
+          };
+          try {
+            const data_s = await services_cities
+              .create(service_city)
+          } catch (e) {
+            res.status(400).send({
+              success: false,
+              data: [],
+              message:
+                e || "Some error occurred while creating the Tutorial."
+            });
+            return;
+          }
         }
       }
     }
