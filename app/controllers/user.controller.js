@@ -458,6 +458,14 @@ exports.updateProfileImage = (req, res) => {
         })
 
 
+    }else {
+        console.log("FIle", req.file)
+        res.status(400).send({
+            status: true,
+            file:req.file,
+            body:req.body
+        })
+
     }
 }
 
