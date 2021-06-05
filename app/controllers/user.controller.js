@@ -511,19 +511,20 @@ exports.deleteProfileImage=(req,res)=>{
 
                             console.log('file deleted successfully');
                         });
+                        return;
                     } else {
                         try {
                             person.photo = null
                             await person.save();
                             res.send({
                                 success: true,
-                                data: [],
-                                message: "Imagen de Perfil Actualizada"
+                                data: [{photo:person.photo}],
+                                message: "Imagen eliminada"
                             })
                         } catch (e) {
                             res.status(400).send({
                                 success: false,
-                                data: [],
+                                data: [{photo:person.photo}],
                                 message: "No se pudo actualizar la imagen de perfil" +e 
                             })
                         }
