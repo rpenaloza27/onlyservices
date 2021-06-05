@@ -11,6 +11,7 @@ router.get("/:user_id", users.findOne);
 router.get("/tests/:firebase_id", users.userExist);
 router.get("/firebase/:user_id", users.findOneByFirebaseId);
 router.put("/update_profile_image", image_service.saveImages("profile_photo", true), users.updateProfileImage);
+router.put("/delete_profile_image", users.deleteProfileImage);
 router.put("/update_firebase_id", users.updateFirebaseIdByEmail);
 router.put("/update/:user_id", users.update);
 router.get("/", users.findAll);

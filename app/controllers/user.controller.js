@@ -469,6 +469,89 @@ exports.updateProfileImage = (req, res) => {
     }
 }
 
+exports.deleteProfileImage=(req,res)=>{
+    users.findOne({
+        where: {
+            firebase_id: req.body.user_id
+        }
+    }).then(async user => {
+        if (user != null) {
+            const person = await people.findOne(
+                { where: { user_id: user.id } }
+            );
+            if (person) {
+                try {
+                    if (person.photo) {
+                        const env_path = enviroment.production ? enviroment.URL : enviroment.URL_LOCAL;
+                        const url = `public/${person.photo.replace(env_path, "")}`;
+                        fs.unlink(url, async function (err) {
+                            if (err) {
+                                res.status(400).send({
+                                    success: false,
+                                    data: [{ url, image_url: person.photo }],
+                                    message: "No se encontró la ruta del archivo " + err
+                                })
+                                return console.log(err);
+                            }
+                            try {
+                                person.photo = null;
+                                await person.save();
+                                res.send({
+                                    success: true,
+                                    data: [],
+                                    message: "Imagen Eliminada"
+                                })
+                            } catch (e) {
+                                res.status(400).send({
+                                    success: false,
+                                    data: [],
+                                    message: "No se pudo actualizar"
+                                })
+                            }
+
+                            console.log('file deleted successfully');
+                        });
+                    } else {
+                        try {
+                            person.photo = null
+                            await person.save();
+                            res.send({
+                                success: true,
+                                data: [],
+                                message: "Imagen de Perfil Actualizada"
+                            })
+                        } catch (e) {
+                            res.status(400).send({
+                                success: false,
+                                data: [],
+                                message: "No se pudo actualizar la imagen de perfil" +e 
+                            })
+                        }
+                    }
+                } catch (e) {
+                    res.status(400).send({
+                        success: false,
+                        data: [],
+                        message: "Error" + e
+                    })
+                }
+
+            }
+            res.status(400).send({
+                success: false,
+                data: [],
+                message: "La persona no existe"
+            })
+        } else {
+            res.status(400).send({
+                success: false,
+                data: [],
+                message: "El usuario no existe"
+            })
+        }
+    })
+}
+
 exports.updateFirebaseIdByEmail = (req, res) => {
     if (req.body.email && req.body.firebase_id) {
         users.update(
