@@ -11,7 +11,13 @@ exports.create = (req, res) => {
 
 // Retrieve all Tutorials from the database.
 exports.findAll = (req, res) => {
-    countries.findAll()
+    countries.findAll(
+      {
+        order: [
+          ['name', 'asc']
+      ],
+      }
+    )
       .then(data => {
         res.send(data);
       })
