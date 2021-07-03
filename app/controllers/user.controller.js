@@ -641,7 +641,7 @@ exports.verifiedOrUnverifiedUser = async (req, res) => {
                                 Atentamente,
                                 OnliiGo (onliigo2020@gmail.com)
                             </p>
-                            <p>Puedes revisar nuestros términos y condiciones <a href="https://onliigo.com/#/terms"></a></p>
+                            <p>Puedes revisar nuestros  <a href="https://onliigo.com/#/terms">términos y condiciones</a></p>
                         </div>
                     </body>
                     </html>`
