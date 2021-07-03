@@ -634,7 +634,7 @@ exports.verifiedOrUnverifiedUser = async (req, res) => {
                         <div style="text-align:center">
                             <img src="https://funcontes.org/imgs/onliigo.png" alt="" style="width: 100px;height: 100px;border-radius: 50%;">
                             ${verifiedUser==1?`<p style="font-weight:bold;font-size:1.5em">¡Feliciataciones!</p>`:""}
-                            <p>Hola, ${name} ${verifiedUser==1? `<img src="https://funcontes.org/imgs/verified.svg" alt="" style="width: 50px;height: 50px;border-radius: 50%;color:green">`:""}</p>
+                            <p>Hola, ${name} ${verifiedUser==1? `<img src="https://funcontes.org/imgs/check.png" alt="" style="width: 20px;height: 20px;border-radius: 50%;color:green">`:""}</p>
                             <p style="text-align: justify;">${mailMessage} </p>
                             
                             <p>
