@@ -611,9 +611,13 @@ exports.verifiedOrUnverifiedUser = async (req, res) => {
             try{
                 await verified();
                 const person = await people.findOne({
-                    user_id: user_exists.id
+                    where:{
+                        user_id: user_exists.id
+                    }
                 });
-                const name = person? `${person.first_name} ${person.lastName} `:""
+                const name = person? `${person.first_name} ${person.last_name} `:""
+                const mailMessage = verifiedUser==1 ? `Has sido verificado por el administrador, en este momento los usuarios que vean tus servicios tendrán más confianza y 
+                fiabilidad en la prestación de tus servicios`: `Has sido desverificado por el administrador, contactanos para ayudarte a verificar los términos y condiciones de nuestro servicio y poder solucionarlo lo más pronto posible`
                 await sendEmail({
                     from: mailerConfig.USER,
                     to:user_exists.email,
@@ -627,17 +631,17 @@ exports.verifiedOrUnverifiedUser = async (req, res) => {
                         <title>Onliigo</title>
                     </head>
                     <body>
-                        <div style="display: flex;justify-content: center;">
-                            <img src="https://funcontes.org/imgs/onliigo.png" alt="" style="width: 200px;height: 200px;border-radius: 50%;">
-                    
-                            <p>Hola, ${name}</p>
-                            <p style="text-align: justify;">Has sido verificado por el administrador, en este momento los usuarios que vean tus servicios tendrán más confianza y 
-                                fiabilidad en la prestación de tus servicios </p>
+                        <div style="text-align:center">
+                            <img src="https://funcontes.org/imgs/onliigo.png" alt="" style="width: 100px;height: 100px;border-radius: 50%;">
+                            ${verifiedUser==1?`<p style="font-weight:bold;font-size:1.5em">¡Feliciataciones!</p>`:""}
+                            <p>Hola, ${name} ${verifiedUser==1? `<img src="https://funcontes.org/imgs/verified.svg" alt="" style="width: 50px;height: 50px;border-radius: 50%;color:green">`:""}</p>
+                            <p style="text-align: justify;">${mailMessage} </p>
                             
                             <p>
                                 Atentamente,
                                 OnliiGo (onliigo2020@gmail.com)
                             </p>
+                            <p>Puedes revisar nuestros términos y condiciones <a href="https://onliigo.com/#/terms"></a></p>
                         </div>
                     </body>
                     </html>`
