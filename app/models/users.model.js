@@ -20,7 +20,11 @@ module.exports = (sequelize, Sequelize, roles) => {
         },
         status: {
             type: DataTypes.INTEGER 
-        }, 
+        },
+        verified : {
+            type: DataTypes.INTEGER,
+            defaultValue:1
+        }
     },  {
         timestamps: false,
     });
@@ -38,6 +42,19 @@ module.exports = (sequelize, Sequelize, roles) => {
             return data != null;
         }catch(e){
             return false;
+        }
+    }
+    users.findOneCustom = async (firebase_id) => {
+        try{
+            const data = await users.findOne({
+                where : {
+                    firebase_id : firebase_id
+                }
+            });
+            return data ;
+        }catch(e){
+            console.log("Error Find one", e)
+            return {};
         }
     }
     // roles.hasMany(users, {

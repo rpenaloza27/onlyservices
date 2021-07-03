@@ -14,8 +14,11 @@ router.put("/update_profile_image", image_service.saveImages("profile_photo", tr
 router.delete("/delete_profile_image/delete", users.deleteProfileImage); 
 router.put("/update_firebase_id", users.updateFirebaseIdByEmail);
 router.put("/update/:user_id", users.update);
+router.put("/verified/:firebase_id", users.verifiedOrUnverifiedUser);
 router.get("/", users.findAll);
 router.get("/companies/featured", users.findAllBusiness);
+router.get("/companies/featured", users.findAllBusiness);
+
 
 
 // Retrieve all published Tutorials

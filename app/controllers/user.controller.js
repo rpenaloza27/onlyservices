@@ -8,9 +8,11 @@ const departments = db.departments;
 const countries = db.countries
 const companies = db.companies;
 const { resolveUrl } = require("../services/image_url_resolver");
+const {verified, sendEmail} = require("../services/mailer.service")
 const { response } = require("../services/response.service");
 const enviroment = require("../../environment/enviroment");
 const fs = require("fs");
+const mailerConfig = require("../../config/mail.config");
 
 
 
@@ -596,8 +598,74 @@ exports.updateFirebaseIdByEmail = (req, res) => {
 
 
 // Delete a Tutorial with the specified id in the request
-exports.delete = (req, res) => {
-
+exports.verifiedOrUnverifiedUser = async (req, res) => {
+    const user_exists = await users.findOneCustom(req.params.firebase_id);
+    try{
+        console.log("User ", user_exists)
+        console.log("Body ", req.params)
+        if(user_exists){
+            const verifiedUser= user_exists.verified==0?1:0;
+            user_exists.verified=verifiedUser;
+            await user_exists.save();
+            const message= verifiedUser == 1 ? "El usuario ha sido verficado": "El usuario ha sido desverificado";
+            try{
+                await verified();
+                const person = await people.findOne({
+                    user_id: user_exists.id
+                });
+                const name = person? `${person.first_name} ${person.lastName} `:""
+                await sendEmail({
+                    from: mailerConfig.USER,
+                    to:user_exists.email,
+                    subject : verifiedUser == 1 ? "Has sido verificado": "Has sido desverificado",
+                    html: `<!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Onliigo</title>
+                    </head>
+                    <body>
+                        <div style="display: flex;justify-content: center;">
+                            <img src="https://funcontes.org/imgs/onliigo.png" alt="" style="width: 200px;height: 200px;border-radius: 50%;">
+                    
+                            <p>Hola, ${name}</p>
+                            <p style="text-align: justify;">Has sido verificado por el administrador, en este momento los usuarios que vean tus servicios tendrán más confianza y 
+                                fiabilidad en la prestación de tus servicios </p>
+                            
+                            <p>
+                                Atentamente,
+                                OnliiGo (onliigo2020@gmail.com)
+                            </p>
+                        </div>
+                    </body>
+                    </html>`
+                });    
+            }catch(e){
+                console.log("Error", e)
+            }
+            res.send({
+                success:true,
+                data:[],
+                messages:[message]
+            })
+        }else{
+            res.status(400).send({
+                success:false,
+                data:[],
+                messages:["El usuario no existe"]
+            })
+        }
+    }catch(e){
+        console.log("Error",e)
+        res.status(500).send({
+            success:false,
+            data:[],
+            messages:e
+        })
+    }
+    
 };
 
 // Delete all Tutorials from the database.
