@@ -617,7 +617,7 @@ exports.verifiedOrUnverifiedUser = async (req, res) => {
                 });
                 const name = person? `${person.first_name} ${person.last_name} `:""
                 const mailMessage = verifiedUser==1 ? `Has sido verificado por el administrador, en este momento los usuarios que vean tus servicios tendrán más confianza y 
-                fiabilidad en la prestación de tus servicios`: `Has sido desverificado por el administrador, contactanos para ayudarte a verificar los términos y condiciones de nuestro servicio y poder solucionarlo lo más pronto posible`
+                fiabilidad en la prestación de tus servicios`: `Tu solicitud de verificación ha sido cancelada, contactanos para ayudarte a verificar los términos y condiciones de nuestro servicio y poder solucionarlo lo más pronto posible`
                 await sendEmail({
                     from: mailerConfig.USER,
                     to:user_exists.email,
