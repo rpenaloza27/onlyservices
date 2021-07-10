@@ -30,6 +30,7 @@ exports.create = (req, res) => {
     long_description: req.body.long_description ? req.body.long_description : '',
     price: req.body.price ? req.body.price : 0,
     payment_type: req.body.payment_type ? req.body.payment_type : 0,
+    status:1
   };
   services.create(service).then(async data => {
     for (let i = 0; i < req.body.categories.length; i++) {
@@ -173,6 +174,9 @@ exports.findAll = (req, res) => {
   services.findAll({
     limit,
     offset,
+    where:{
+      status:1
+    },
     include: [{ model: payment_types,as: 'Payment_Type', }, { model: service_images, paranoid: false }, { model: user, include: [{ model: people }, { model: companies }] }, { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } }]
   })
     .then(data => {
@@ -219,6 +223,7 @@ exports.searchServices = (req, res) => {
           { long_description: { [Op.substring]: req.query.search } },
           { short_description: { [Op.substring]: req.query.search } }
         ],
+        status:1
       },
       include: [
         { model: service_images, paranoid: false },
@@ -253,6 +258,7 @@ exports.searchServices = (req, res) => {
               { short_description: { [Op.substring]: req.query.search } },
               { price: { [Op.between]: [minimum, maximum] } }
             ],
+            status:1
           },
           include: [{ model: service_images, paranoid: false },
           { model: payment_types,as: 'Payment_Type', },
@@ -281,6 +287,7 @@ exports.searchServices = (req, res) => {
               { short_description: { [Op.substring]: req.query.search } },
               { price: { [Op.gte]: minimum, } }
             ],
+            status:1
           },
           include: [{ model: service_images, paranoid: false },
           { model: payment_types,as: 'Payment_Type', },
@@ -312,6 +319,7 @@ exports.searchServices = (req, res) => {
               { short_description: { [Op.substring]: req.query.search } },
               { price: { [Op.lte]: maximum, } }
             ],
+            status:1
           },
           include: [{ model: service_images, paranoid: false },
           { model: payment_types,as: 'Payment_Type', },
@@ -566,7 +574,8 @@ exports.findCategoriesServices = (req, res) => {
 exports.findServicesFeatured = (req, res) => {
   services.findAll({
     where: {
-      number_of_visits: { [Op.gte]: 8 }
+      number_of_visits: { [Op.gte]: 8 },
+      status:1
     },
     include: [{ model: service_images, paranoid: false },
       { model: payment_types,as: 'Payment_Type', },
@@ -775,7 +784,7 @@ exports.findOne = (req, res) => {
   if (req.params.id) {
     services
       .findOne({
-        where: { id: req.params.id },
+        where: { id: req.params.id,status:1 },
         include:
           [
             { model: payment_types,as: 'Payment_Type', },
@@ -919,7 +928,7 @@ exports.findServicesByUser = (req, res) => {
   services.findAndCountAll({
     limit,
     offset,
-    where: { user_id: req.params.user_id },
+    where: { user_id: req.params.user_id,status:1 },
     include: [{ model: payment_types,as: 'Payment_Type', },{ model: service_images, paranoid: false }, { model: user, include: [{ model: people }, { model: companies }] }, { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } }]
   }).then(data => {
     const response = getPagingData(data, page, limit, req);

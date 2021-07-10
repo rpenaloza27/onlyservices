@@ -599,25 +599,36 @@ exports.updateFirebaseIdByEmail = (req, res) => {
 
 // Delete a Tutorial with the specified id in the request
 exports.verifiedOrUnverifiedUser = async (req, res) => {
+    //Find the user 
     const user_exists = await users.findOneCustom(req.params.firebase_id);
     try{
         console.log("User ", user_exists)
         console.log("Body ", req.params)
+        //Validate if the user exists
         if(user_exists){
+            //Invert the verified value
             const verifiedUser= user_exists.verified==0?1:0;
+            //Assign to the user
             user_exists.verified=verifiedUser;
+            //Save it
             await user_exists.save();
+            //Construct the message
             const message= verifiedUser == 1 ? "El usuario ha sido verficado": "El usuario ha sido desverificado";
             try{
+                // Verify if the backend can send email
                 await verified();
+                //Look for the people
                 const person = await people.findOne({
                     where:{
                         user_id: user_exists.id
                     }
                 });
+                //Name
                 const name = person? `${person.first_name} ${person.last_name} `:""
+                // Body Message
                 const mailMessage = verifiedUser==1 ? `Has sido verificado por el administrador, en este momento los usuarios que vean tus servicios tendrán más confianza y 
                 fiabilidad en la prestación de tus servicios`: `Tu solicitud de verificación ha sido cancelada, contactanos para ayudarte a verificar los términos y condiciones de nuestro servicio y poder solucionarlo lo más pronto posible`
+                //Send Email with custom json
                 await sendEmail({
                     from: mailerConfig.USER,
                     to:user_exists.email,

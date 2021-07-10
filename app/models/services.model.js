@@ -29,7 +29,8 @@ module.exports = (sequelize, Sequelize, users, details, images, comments, people
             defaultValue: 1 
         },
         status: {
-            type: DataTypes.INTEGER
+            type: DataTypes.INTEGER,
+            defaultValue: 1 
         },
     }, {
         timestamps: false,
