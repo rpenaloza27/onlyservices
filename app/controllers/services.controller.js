@@ -233,12 +233,6 @@ exports.searchServices = (req, res) => {
             [{ model: people }, { model: companies }]
         },
         { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
-        {
-          model: services_cities, include:
-          {
-            model: municipios,
-          }
-        }
       ]
     }
     //[Op.between]: [6, 10],    
@@ -267,12 +261,7 @@ exports.searchServices = (req, res) => {
               [{ model: people }, { model: companies }]
           },
           { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
-          {
-            model: services_cities, include:
-            {
-              model: municipios,
-            }
-          }
+         
           ]
         }
       } else {
@@ -296,12 +285,6 @@ exports.searchServices = (req, res) => {
               [{ model: people }, { model: companies }]
           },
           { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
-          {
-            model: services_cities, include:
-            {
-              model: municipios,
-            }
-          }
           ]
         }
       }
@@ -328,12 +311,6 @@ exports.searchServices = (req, res) => {
               [{ model: people }, { model: companies }]
           },
           { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
-          {
-            model: services_cities, include:
-            {
-              model: municipios,
-            }
-          }
           ]
         }
       } else {
@@ -584,12 +561,6 @@ exports.findServicesFeatured = (req, res) => {
         [{ model: people }, { model: companies }]
     },
     { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
-    {
-      model: services_cities, include:
-      {
-        model: municipios,
-      }
-    }
     ]
   }).then(data => {
     if (data.length > 0) {
