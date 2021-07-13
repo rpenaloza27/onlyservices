@@ -226,14 +226,14 @@ exports.searchServices = (req, res) => {
         status:1
       },
       include: [
-        { model: service_images, paranoid: false },
+        { model: service_images },
         { model: payment_types,as: 'Payment_Type', },
         {
           model: user, include:
             [{ model: people }, { model: companies }]
         },
         { model: service_comments, include: { model: user, include: [{ model: people }, { model: companies }] } },
-      ]
+      ] 
     }
     //[Op.between]: [6, 10],    
 
