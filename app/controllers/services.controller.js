@@ -788,10 +788,9 @@ exports.findOne = (req, res) => {
         include:
           [
             { model: payment_types,as: 'Payment_Type', },
-            { model: service_images, paranoid: false },
+            { model: service_images },
           { model: user, include: [{ model: people }, { model: companies }] },
-          { model: service_comments, include: { model: user, include: people } },
-          { model: services_cities, include: municipios }
+          
           ]
       })
       .then(service => {
