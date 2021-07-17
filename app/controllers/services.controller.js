@@ -51,7 +51,18 @@ exports.create = (req, res) => {
         return;
       }
     }
-    if(req.body.scale_type){
+    const freelanceCategory=req.body.categories.find(d=>d==17);
+    
+    const service_u = await services.findOneCustom(data.id)
+    res.send({
+      success: true,
+      data: [service_u],
+      message: "El servicio se ha creado con éxito"
+    });
+    if(freelanceCategory){
+      req.body.scale_type= 'country'
+    }
+    if(req.body.scale_type ){
       switch(req.body.scale_type){
         case 'city':
           const service_city ={
@@ -87,12 +98,7 @@ exports.create = (req, res) => {
               const data_s = await services_cities
                 .create(service_city)
             } catch (e) {
-              res.status(400).send({
-                success: false,
-                data: [],
-                message:
-                  e || "Some error occurred while creating the Tutorial."
-              });
+              
               return;
             }
           }
@@ -123,12 +129,7 @@ exports.create = (req, res) => {
             }
             await services_cities.bulkCreate(cities)
           }
-          res.send({
-            success:true,
-            data:[cities_of_country],
-            message: "No se creé el servicio"
-          })
-          return;
+          
           break;
       }
     }else{
@@ -142,23 +143,12 @@ exports.create = (req, res) => {
             const data_s = await services_cities
               .create(service_city)
           } catch (e) {
-            res.status(400).send({
-              success: false,
-              data: [],
-              message:
-                e || "Some error occurred while creating the Tutorial."
-            });
+            
             return;
           }
         }
       }
     }
-    const service_u = await services.findOneCustom(data.id)
-    res.send({
-      success: true,
-      data: [service_u],
-      message: "El servicio se ha creado con éxito"
-    });
   }).catch(err => {
     res.status(400).send({
       success: false,
