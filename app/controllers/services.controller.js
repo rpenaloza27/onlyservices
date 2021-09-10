@@ -51,7 +51,7 @@ exports.create = (req, res) => {
         return;
       }
     }
-    const freelanceCategory=req.body.categories.find(d=>d==17);
+    const freelanceCategory=req.body.categories.find(d=>d==18);
     
     const service_u = await services.findOneCustom(data.id)
     res.send({

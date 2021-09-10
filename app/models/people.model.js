@@ -42,10 +42,10 @@ module.exports = (sequelize, Sequelize, document_type, users, city) => {
         foreignKey: 'id',
         sourceKey: 'document_type',
     });
-    // people.hasOne(users, {
-    //     foreignKey: 'id',
-    //     sourceKey: 'user_id',
-    // });
+    people.hasOne(users, {
+        foreignKey: 'id',
+        sourceKey: 'user_id',
+    });
     users.hasOne(people, {
         foreignKey: 'user_id',
         sourceKey: 'id',

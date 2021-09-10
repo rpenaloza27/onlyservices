@@ -1,8 +1,8 @@
 module.exports = {
-    HOST: "50.87.249.11",
-    USER: "funconte_xpress",
-    PASSWORD: "@Only5ervic3s2020",
-    DB: "funconte_onlyservices",
+    HOST: "162.214.160.224",
+    USER: "onliigo2_onlii",
+    PASSWORD: "C+d@y~cXwbaV",
+    DB: "onliigo2_onliigo_db",
     dialect: "mysql",
     pool: {
       max: 5,

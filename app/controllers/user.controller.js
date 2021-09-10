@@ -444,11 +444,7 @@ exports.updateProfileImage = (req, res) => {
                         })
                     )
                     .catch(err =>
-                        res.status(400).send({
-                            success: false,
-                            data: [],
-                            message: err
-                        })
+                       {}
                     )
             } else {
                 res.status(400).send({
