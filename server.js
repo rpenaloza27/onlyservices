@@ -3,6 +3,8 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const morgan =  require('morgan');
 
+var vhost = require('vhost');
+
 const path = require('path');
 
 const app = express();
@@ -43,15 +45,15 @@ const routes = require("./app/routes")(app);
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
 
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}.`);
-// });
-
-var server = https.createServer(options, app);
-
-server.listen(port, () => {
-  console.log("server starting on port : " + port)
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`);
 });
+
+// var server = https.createServer(options, app);
+
+// server.listen(port, () => {
+//   console.log("server starting on port : " + port)
+// });
 
 const db = require("./app/models");
 try{
