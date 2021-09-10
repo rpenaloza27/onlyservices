@@ -23,10 +23,10 @@ app.use(express.static(__dirname + '/public'));
 app.use(morgan('dev'));
 
 const fs = require('fs');
-const port = 3000;
+const port = 8443;
 
-var key = fs.readFileSync('./certificate.key');
-var cert = fs.readFileSync('./certificatecrt.crt');
+var key = fs.readFileSync('./my_cert.key');
+var cert = fs.readFileSync('./my_cert.crt');
 var options = {
   key: key,
   cert: cert
