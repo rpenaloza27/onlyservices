@@ -17,9 +17,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+
 app.use(express.static(__dirname + '/public'));
 
 app.use(morgan('dev'));
+
+const fs = require('fs');
+const port = 3000;
+
+var key = fs.readFileSync('./selfsigned.key');
+var cert = fs.readFileSync('./selfsigned.crt');
+var options = {
+  key: key,
+  cert: cert
+};
+
 
 // simple route
 app.get("/", (req, res) => {
@@ -31,8 +43,14 @@ const routes = require("./app/routes")(app);
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}.`);
+// });
+
+var server = https.createServer(options, app);
+
+server.listen(port, () => {
+  console.log("server starting on port : " + port)
 });
 
 const db = require("./app/models");
