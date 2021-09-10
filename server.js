@@ -25,8 +25,8 @@ app.use(morgan('dev'));
 const fs = require('fs');
 const port = 3000;
 
-var key = fs.readFileSync('./selfsigned.key');
-var cert = fs.readFileSync('./selfsigned.crt');
+var key = fs.readFileSync('./certificate.key');
+var cert = fs.readFileSync('./certificatecrt.crt');
 var options = {
   key: key,
   cert: cert
