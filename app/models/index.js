@@ -39,13 +39,13 @@ db.services_cities= require("./services_cities.model")(sequelize, Sequelize,db.s
 db.user_services_favorites = require("./user_services_favorites.model")(sequelize, Sequelize, db.services, db.users);
 db.payment_types = require('./payment_types.model')(sequelize,Sequelize,db.services);
 const models = Object.keys(db).filter(key=> key!='Sequelize' && key!='sequelize' && key!='module')
-models.forEach(async key=>{
-  try{
-    console.log("Key", key,"color:yellow")
-    await db[key].sync();
-  }catch(e){
-    console.log("Error DB", e)
-  }
+// models.forEach(async key=>{
+//   try{
+//     console.log("Key", key,"color:yellow")
+//     await db[key].sync();
+//   }catch(e){
+//     console.log("Error DB", e)
+//   }
   
-})
+// })
 module.exports = db;
