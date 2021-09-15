@@ -20,4 +20,5 @@ module.exports = (app) => {
     app.use("/favorites", favorites_routes);
     //payment_types
     app.use("/payment_types", payment_types);
+    return app;
 }
