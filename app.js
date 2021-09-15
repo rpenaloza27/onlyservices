@@ -51,7 +51,7 @@ router.use("/services", services_routes);
 router.use("/categories", categories_routes);
 router.use("/favorites", favorites_routes);
 router.use("/payment_types", payment_types);
-app.use("/backend", routes)
+app.use("/backend", router)
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
