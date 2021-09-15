@@ -36,11 +36,22 @@ var options = {
 
 
 // simple route
-app.get("/", (req, res) => {
+
+var router = require("express").Router();
+router.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
-
-const routes = require("./app/routes")(app);
+router.use("/countries", countries_routes);
+router.use("/departments", departments_routes);
+router.use("/municipalities", municipalities_routes);
+router.use("/documents_types", documents_types_routes);
+router.use("/users", users_routes);
+router.use("/categories_services", categories_services_routes);
+router.use("/services", services_routes);
+router.use("/categories", categories_routes);
+router.use("/favorites", favorites_routes);
+router.use("/payment_types", payment_types);
+app.use("/backend", routes)
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
