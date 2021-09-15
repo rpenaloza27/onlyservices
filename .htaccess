@@ -1,4 +1,8 @@
-
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteBase /
+RewriteRule ^server/(.*)?$ http://127.0.0.1:3000/$1 [P,L]
 # php -- BEGIN cPanel-generated handler, do not edit
 # Set the “ea-php71” package as the default “PHP” programming language.
 <IfModule mime_module>
