@@ -9,16 +9,16 @@ const categories_routes = require("./categories.routes");
 const favorites_routes = require("./user_services_favorites.routes");
 const payment_types = require("./payment_types.routes")
 module.exports = (app) => {
-    app.use("/countries", countries_routes);
-    app.use("/departments", departments_routes);
-    app.use("/municipalities", municipalities_routes);
-    app.use("/documents_types", documents_types_routes);
-    app.use("/users", users_routes);
-    app.use("/categories_services", categories_services_routes);
-    app.use("/services", services_routes);
-    app.use("/categories", categories_routes);
-    app.use("/favorites", favorites_routes);
+    app.use("/backend/countries", countries_routes);
+    app.use("/backend/departments", departments_routes);
+    app.use("/backend/municipalities", municipalities_routes);
+    app.use("/backend/documents_types", documents_types_routes);
+    app.use("/backend/users", users_routes);
+    app.use("/backend/categories_services", categories_services_routes);
+    app.use("/backend/services", services_routes);
+    app.use("/backend/categories", categories_routes);
+    app.use("/backend/favorites", favorites_routes);
     //payment_types
-    app.use("/payment_types", payment_types);
+    app.use("/backend/payment_types", payment_types);
     return app;
 }
