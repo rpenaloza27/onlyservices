@@ -7,6 +7,29 @@ const image_service = require("../services/image_upload.service");
 
 // Retrieve all Tutorials
 router.post("/", users.create);
+router.get("/imgs/:path", (req, res)=>{
+    const path= req.params.path;
+    const format = path.substring(path.lastIndexOf('.')+1, path.length) || path
+    const formatWithoutDot = format.replace(".", "");
+    const filePath = `${__dirname}/public/imgs/${path}`; 
+    // or any file format
+
+    // Check if file specified by the filePath exists
+    fs.stat(filePath, function (exists) {
+        if (exists) {
+            // Content-type is very interesting part that guarantee that
+            // Web browser will handle response in an appropriate manner.
+            res.writeHead(200, {
+                "Content-Type": `image/${formatWithoutDot}`,
+                "Content-Disposition": "attachment; filename=" + path
+            });
+            fs.createReadStream(filePath).pipe(res);
+            return;
+        }
+        res.writeHead(400, { "Content-Type": "text/plain" });
+        res.end("ERROR File does not exist");
+    });
+});
 router.get("/:user_id", users.findOne);
 router.get("/tests/:firebase_id", users.userExist);
 router.get("/firebase/:user_id", users.findOneByFirebaseId);
