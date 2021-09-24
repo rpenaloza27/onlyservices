@@ -36,7 +36,7 @@ var options = {
 
 
 // simple route
-app.get("/backend/", (req, res) => {
+app.get("/backend", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
 
