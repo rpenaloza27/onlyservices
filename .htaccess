@@ -3,4 +3,4 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteBase /
 RewriteRule ^server/(.*)?$ https://127.0.0.1:3000/$1 [P,L]
-RewriteCond %{REQUEST_URI} !.*\.(css¦js|html|png|jpg)
+#RewriteCond %{REQUEST_URI} !.*\.(css¦js|html|png|jpg)

@@ -43,7 +43,7 @@ app.get("/backend/", (req, res) => {
 
 const routes = require("./app/routes")(app);
 
-app.use("/backend/imgs/",express.static(__dirname + '/public'));
+app.use("/backend",express.static(__dirname + '/public'));
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
