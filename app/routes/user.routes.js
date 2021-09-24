@@ -11,7 +11,7 @@ router.get("/imgs/:path", (req, res)=>{
     const path= req.params.path;
     const format = path.substring(path.lastIndexOf('.')+1, path.length) || path
     const formatWithoutDot = format.replace(".", "");
-    const filePath = `../../public/imgs/${path}`; 
+    const filePath = `${__basedir}/public/imgs/${path}`; 
     // or any file format
 
     // Check if file specified by the filePath exists

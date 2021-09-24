@@ -6,7 +6,7 @@ const morgan =  require('morgan');
 var vhost = require('vhost');
 
 const path = require('path');
-
+global.__basedir = __dirname;
 const app = express();
 const https = require('https');
 
