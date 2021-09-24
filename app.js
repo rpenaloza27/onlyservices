@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 console.log("Dir ", __dirname + '/public')
-app.use("/",express.static(path.join(__dirname, 'public')));
+app.use("backend/",express.static(path.join(__dirname, 'public')));
 
 app.use(morgan('dev'));
 
