@@ -8,31 +8,12 @@ const services_routes = require("./services.routes");
 const categories_routes = require("./categories.routes");
 const favorites_routes = require("./user_services_favorites.routes");
 const payment_types = require("./payment_types.routes")
+const imgs_routes = require("./imgs.routes")
 const express = require("express");
 const fs = require("fs");
 
 module.exports = (app) => {
-    app.get("/backend/imgs/:path", (req, res) => {
-        console.log("Path", req.params.path)
-        const url = `${dirname}/public/imgs/${path}`
-        // Check if file specified by the filePath exists
-        fs.stat(url, function (exists) {
-            if (exists) {
-                // Content-type is very interesting part that guarantee that
-                // Web browser will handle response in an appropriate manner.
-                response.writeHead(200, {
-                    "Content-Type": "image/jpg",
-                    "Content-Disposition": "attachment; filename=" + fileName
-                });
-                fs.createReadStream(url).pipe(response);
-                return;
-            }
-            response.writeHead(400, { "Content-Type": "text/plain" });
-            response.end("ERROR File does not exist");
-        });
-       
-
-    });
+    app.get("/backend/imgs",imgs_routes);
     app.use("/backend/countries", countries_routes);
     app.use("/backend/departments", departments_routes);
     app.use("/backend/municipalities", municipalities_routes);
