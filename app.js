@@ -36,14 +36,14 @@ var options = {
 
 
 // simple route
-app.get("/backend", (req, res) => {
+app.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
 
 
 const routes = require("./app/routes")(app);
 
-
+app.use('/backend', express.static(__dirname + '/public'));
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
