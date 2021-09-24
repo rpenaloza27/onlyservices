@@ -9,7 +9,7 @@ const { formatWithOptions } = require("util");
 router.get("/:path", (req, res)=>{
     const path= req.params.path;
     const format = path.substring(path.lastIndexOf('.')+1, path.length) || path
-    const formatWithoutDot = path.replace(".", "");
+    const formatWithoutDot = format.replace(".", "");
     const filePath = `${__dirname}/public/imgs/${path}`; 
     // or any file format
 
@@ -19,7 +19,7 @@ router.get("/:path", (req, res)=>{
             // Content-type is very interesting part that guarantee that
             // Web browser will handle response in an appropriate manner.
             res.writeHead(200, {
-                "Content-Type": `image/${formatWithOptions}`,
+                "Content-Type": `image/${formatWithoutDot}`,
                 "Content-Disposition": "attachment; filename=" + path
             });
             fs.createReadStream(filePath).pipe(res);
