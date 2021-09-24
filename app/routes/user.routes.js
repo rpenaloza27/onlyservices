@@ -26,8 +26,9 @@ router.get("/imgs/:path", (req, res)=>{
             fs.createReadStream(filePath).pipe(res);
             return;
         }
-        res.writeHead(400, { "Content-Type": "text/plain" });
-        res.end("ERROR File does not exist");
+        res.send({
+            error:"No existe"
+        })
     });
 });
 router.get("/:user_id", users.findOne);
