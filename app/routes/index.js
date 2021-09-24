@@ -8,7 +8,9 @@ const services_routes = require("./services.routes");
 const categories_routes = require("./categories.routes");
 const favorites_routes = require("./user_services_favorites.routes");
 const payment_types = require("./payment_types.routes")
+const express = require("express");
 module.exports = (app) => {
+    app.use("/backend",express.static(__dirname + '/public'));
     app.use("/backend/countries", countries_routes);
     app.use("/backend/departments", departments_routes);
     app.use("/backend/municipalities", municipalities_routes);
