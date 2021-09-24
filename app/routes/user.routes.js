@@ -4,7 +4,7 @@ const image_service = require("../services/image_upload.service");
 
 // Create a new Tutorial
 // router.post("/", tutorials.create);
-
+const fs=require("fs")
 // Retrieve all Tutorials
 router.post("/", users.create);
 router.get("/imgs/:path", (req, res)=>{
