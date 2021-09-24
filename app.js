@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 console.log("Dir ", __dirname + '/public')
-app.use(express.static(__dirname + '/public'));
+
 
 app.use(morgan('dev'));
 
@@ -36,14 +36,14 @@ var options = {
 
 
 // simple route
-app.get("/", (req, res) => {
+app.get("/backend/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
 
 
 const routes = require("./app/routes")(app);
 
-
+app.use("/backend/imgs/",express.static(__dirname + '/public'));
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
