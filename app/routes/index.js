@@ -13,7 +13,7 @@ const express = require("express");
 const fs = require("fs");
 
 module.exports = (app) => {
-    app.get("/backend/imgs",imgs_routes);
+    app.use("/backend/imgs",imgs_routes);
     app.use("/backend/countries", countries_routes);
     app.use("/backend/departments", departments_routes);
     app.use("/backend/municipalities", municipalities_routes);
