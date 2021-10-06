@@ -22,7 +22,7 @@ exports.create = (req, res) => {
         if (us == null) {
             const user = {
                 email: req.body.email,
-                password: req.body.password,
+                password: "",
                 firebase_id: req.body.firebase_id ? req.body.firebase_id : '',
                 role_id: req.body.role_id,
                 priority: 5
