@@ -54,11 +54,6 @@ exports.create = (req, res) => {
     const freelanceCategory=req.body.categories.find(d=>d==18);
     
     const service_u = await services.findOneCustom(data.id)
-    res.send({
-      success: true,
-      data: [service_u],
-      message: "El servicio se ha creado con éxito"
-    });
     if(freelanceCategory){
       req.body.scale_type= 'country'
     }
@@ -149,6 +144,12 @@ exports.create = (req, res) => {
         }
       }
     }
+    res.send({
+      success: true,
+      data: [service_u],
+      message: "El servicio se ha creado con éxito"
+    });
+    
   }).catch(err => {
     res.status(400).send({
       success: false,
