@@ -511,7 +511,7 @@ exports.searchServices = async (req, res) => {
   }
 }
 
-exports.findCategoriesServices = (req, res) => {
+exports.findCategoriesServices = async(req, res) => {
   await db.sequelize.query("SET SESSION SQL_BIG_SELECTS =1");
   categories_services.findAll({
     where: {
@@ -541,7 +541,7 @@ exports.findCategoriesServices = (req, res) => {
   })
 }
 
-exports.findServicesFeatured = (req, res) => {
+exports.findServicesFeatured = async(req, res) => {
   await db.sequelize.query("SET SESSION SQL_BIG_SELECTS =1");
   services.findAll({
     where: {
