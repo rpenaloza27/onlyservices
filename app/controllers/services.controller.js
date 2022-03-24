@@ -363,7 +363,7 @@ exports.searchServices = async (req, res) => {
         {
           model: municipios,
         }, where: {
-          [Op.or]: [
+          [Op.and]: [
             { city_id: req.query.city_id },
           ],
         }
@@ -401,7 +401,7 @@ exports.searchServices = async (req, res) => {
             {
               model: municipios,
             }, where: {
-              [Op.or]: [
+              [Op.and]: [
                 { city_id: req.query.city_id },
               ],
             }
@@ -433,7 +433,7 @@ exports.searchServices = async (req, res) => {
             {
               model: municipios,
             }, where: {
-              [Op.or]: [
+              [Op.and]: [
                 { city_id: req.query.city_id },
               ],
             }
