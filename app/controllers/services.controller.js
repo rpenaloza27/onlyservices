@@ -193,7 +193,8 @@ exports.findAll = (req, res) => {
     });
 };
 
-exports.searchServices = (req, res) => {
+exports.searchServices = async (req, res) => {
+  await db.sequelize.query("SET SESSION SQL_BIG_SELECTS =1");
   let { page, size, minimum, maximum } = req.query;
   const { limit, offset } = getPagination(page, size);
   //filters city_id, minimum,maximum
@@ -511,6 +512,7 @@ exports.searchServices = (req, res) => {
 }
 
 exports.findCategoriesServices = (req, res) => {
+  await db.sequelize.query("SET SESSION SQL_BIG_SELECTS =1");
   categories_services.findAll({
     where: {
       service_id: req.params.service_id
@@ -540,6 +542,7 @@ exports.findCategoriesServices = (req, res) => {
 }
 
 exports.findServicesFeatured = (req, res) => {
+  await db.sequelize.query("SET SESSION SQL_BIG_SELECTS =1");
   services.findAll({
     where: {
       number_of_visits: { [Op.gte]: 8 },

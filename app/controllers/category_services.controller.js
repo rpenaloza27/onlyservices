@@ -7,6 +7,7 @@ const people = db.people;
 const user_services_favorites = db.user_services_favorites;
 const categories = db.categories;
 const Op = db.Sequelize.Op;
+const sequelize= db.sequelize;
 const service_images = db.service_images;
 const { getPagination, getPagingData } = require("../services/pagination.service");
 const service_comments = db.service_comments;
@@ -22,8 +23,8 @@ exports.create = (req, res) => {
 };
 
 // Retrieve all Tutorials from the database.
-exports.findServicesByCategories = (req, res) => {
-
+exports.findServicesByCategories = async(req, res) => {
+    await db.sequelize.query("SET SESSION SQL_BIG_SELECTS =1");
     if (req.params.category_id) {
         let { page, size, minimum, maximum } = req.query;
         const { limit, offset } = getPagination(page, size);
@@ -48,12 +49,7 @@ exports.findServicesByCategories = (req, res) => {
                             model: service_comments,
                             include: { model: user, include: people }
                         },
-                        {
-                            model: services_cities, include:
-                            {
-                                model: municipios,
-                            }
-                        }
+                        
                     ],
                     order: [
                         [{ model: user }, 'priority', 'asc']
@@ -150,8 +146,8 @@ exports.findServicesByCategories = (req, res) => {
 
 };
 
-exports.findServicesByCategoriesSearch = (req, res) => {
-
+exports.findServicesByCategoriesSearch = async (req, res) => {
+    await db.sequelize.query("SET SESSION SQL_BIG_SELECTS =1");
     if (req.params.category_id) {
         let { page, size, minimum, maximum } = req.query;
         const { limit, offset } = getPagination(page, size);
